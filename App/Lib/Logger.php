@@ -18,15 +18,8 @@ class Logger
      */
     private static function log(string $action, int $userId, int $status, string $description, int $logType): void
     {
-        if ($userId == 0) {
-            // Handling of special cases, Unable to get the id of the operating user
-            $getItAdminId = DB::link()->table('user')->limit(1)->field('userId')->get();
-            $data['user_id'] = $getItAdminId[0]['userId'];
-            $data['description'] = '!!Error, illegal operation user id, ' . $description;
-        } else {
-            $data['user_id'] = $userId;
-            $data['description'] = $description;
-        }
+        $data['user_id'] = $userId;
+        $data['description'] = $description;
         $data['action'] = $action;
         $data['status'] = $status;
         $data['log_type'] = $logType;
