@@ -36,20 +36,15 @@ class Validator
                 }
 
                 if (!$this->$method($value, $params)) {
-                    // $message = isset($this->messages["$field.$rule"]) ? $this->messages["$field.$rule"] : "The $field field is invalid.";
-                    // $errors[$field] = $message;
-
-                    // FIXME Temporary solution, only return a string message for now
                     $message = isset($this->messages["$field.$rule"]) ? $this->messages["$field.$rule"] : "The $field field is invalid.";
-                    $errors = $message;
+                    $errors[$field] = $message;
 
                     break;
                 }
             }
         }
 
-        // return count($errors) ? $errors : true;
-        return !empty($errors) ? $errors : true;
+        return count($errors) ? $errors : true;
     }
 
     private function validate_required($value, $params)
