@@ -18,12 +18,13 @@ class FileLogger
             PHP_EOL // Line break
         );
 
-        if (!is_dir('logs')) {
-            mkdir('logs', 0777, true);
+        $pathLogs = PROJECT_ROOT_PATH . '/logs';
+        if (!is_dir($pathLogs)) {
+            mkdir($pathLogs, 0777, true);
         }
 
         // Use a log file name that includes the user ID if available
-        $file = 'logs/' . 'Daily_' . date('Y_m_d') . '.log';
+        $file = $pathLogs . '/' . 'Daily_' . date('Y_m_d') . '.log';
         file_put_contents($file, $message, FILE_APPEND);
 
         // FILE_APPEND flag prevents flushing the file content on each call 

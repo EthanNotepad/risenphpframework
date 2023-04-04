@@ -5,8 +5,8 @@ namespace App\Lib;
 class UploadFiles
 {
     /**
-     * @param $fileData
-     * @return void
+     * $path like 'public/files/'
+     * A folder will be created in public/files/ in the root directory
      */
     public function uploadFilesBase64($fileData, $path)
     {
@@ -15,7 +15,7 @@ class UploadFiles
             if ($type == 'x-icon') {
                 $type = 'ico';
             }
-            $pathDir = $path . date('Ymd', time()) . "/";
+            $pathDir = PROJECT_ROOT_PATH . $path . date('Ymd', time()) . "/";
             if (!is_dir($pathDir)) {
                 mkdir($pathDir, 0777, true);
             }

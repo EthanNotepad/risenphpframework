@@ -15,17 +15,9 @@ class Test
         /**
          * Test the config function
          */
-        if (1) {
-            dd(DB::link());
-        }
-
-        /**
-         * Test the config function
-         */
         if (0) {
-            $configDataTest1 = config('frontEndIndex');
-            $configDataTest2 = config('rentalStatusTyp');
-            dump($configDataTest1, $configDataTest2);
+            $displayErrors = config('app.displayErrors');
+            dump($displayErrors);
         }
 
         /**

@@ -1,10 +1,4 @@
 .DS_Store
 /.vscode/
-/vendor/
-/public/upload
-/public/pdf
-/public/files/
 config/database.php
 /logs/
-/resources/assets/js/config.js
-/resources/layout/DB.php

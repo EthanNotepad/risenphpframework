@@ -1,7 +1,7 @@
 <?php
 
 if (file_exists("./config/database.php")) {
-    require './config/database.php';
+    require_once './config/database.php';
 } else {
     die("<h1 style='margin:20px;color:#535353;font:24px/1.2 Helvetica, Arial'>
     <span style='font-size:150px;'>:(</span><br/>Database configuration file not found</h1>");
