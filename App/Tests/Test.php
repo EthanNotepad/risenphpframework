@@ -56,7 +56,7 @@ class Test
          * Test log database table functionality
          */
         if (0) {
-            $dbname = DB_NAME;
+            $dbname = config('database.mysql.dbname');
             $ishavelogssql = "SHOW TABLES IN $dbname WHERE Tables_in_$dbname = 'logs'";
             $result = \App\Lib\DB::link()->query($ishavelogssql);
             if (count($result)) {
@@ -80,6 +80,20 @@ class Test
                 \App\Lib\Logger::sensitive(1);
             }
             echo 'moving on';
+        }
+
+        /**
+         * Test the database query function
+         */
+        if (0) {
+            $id = $_GET['id'] = "1 OR 1=1";     // test sql injection
+            $whereSql[] = array('logs.id', '=', $id);
+            $getOne = \App\Lib\DB::link()->table('logs')->where('id', '=', 1)->field('id', 'user_id')->getOne();
+            $getAll = \App\Lib\DB::link()->table('logs')->where('id', '=', 1)->field('id', 'user_id')->limit(1, 100)->order("id ASC")->get();
+            $getCount = \App\Lib\DB::link()->table('logs')->where('id', '=', 3)->field('id')->count();
+            $getLeftJoin = \App\Lib\DB::link()->table('logs')->where($whereSql)->join('logs AS logs2', 'logs2.user_id = logs.id')->get();
+            $getFieldNotSafe = \App\Lib\DB::link()->table('logs')->where($whereSql)->join('logs AS logs2', 'logs2.user_id = logs.id')->fieldString('logs.id')->get();
+            $getSqlDd = \App\Lib\DB::link()->table('logs')->where('id', '=', 1)->field('id', 'user_id')->limit(1, 100)->order("id ASC")->dd('get');
         }
 
         echo '<br>';

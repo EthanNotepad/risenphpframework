@@ -7,8 +7,17 @@ use PDOException;
 
 class DB
 {
+    protected static $dbCofig;
+
     // Private a static variable to determine whether to instantiate
     private static $db_instance;
+
+    private $table = '';
+    private $where = 'where (1 = 1)';
+    private $limit = '';
+    private $order = '';
+    private $field = ' * ';
+    private $join = [];
 
     private function __clone()
     {
@@ -17,22 +26,17 @@ class DB
 
     public $db;
 
-    protected $options = [
-        'table' => '',
-        'field' => ' * ',
-        'order' => '',
-        'limit' => '',
-        'where' => ''
-    ];
     protected function config()
     {
-        return sprintf("mysql:host=%s;dbname=%s;chartset=%s;port=%s", DB_HOST, DB_NAME, DB_CHARSET, DB_PORT);
+
+        return sprintf("mysql:host=%s;dbname=%s;chartset=%s;port=%s", self::$dbCofig['host'], self::$dbCofig['dbname'], self::$dbCofig['dbcharset'], self::$dbCofig['port']);
     }
 
     private function __construct()
     {
         try {
-            $this->db = new PDO($this->config(), DB_USER, DB_PASS);
+            self::$dbCofig = config('database.mysql');
+            $this->db = new PDO($this->config(), self::$dbCofig['username'], self::$dbCofig['password']);
             // get only associative array
             $this->db->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
             $this->db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
@@ -55,8 +59,7 @@ class DB
         $stn = self::link()->db->prepare($sql);
         $stn->execute($vars);
         $result = $stn->fetchAll();
-        // can update function(not online@sheng)
-        // $result = (count($result) === 1) ? $result[0] : $result;
+        $this->free();
         return $result;
     }
 
@@ -64,6 +67,7 @@ class DB
     {
         $stn = self::link()->db->prepare($sql);
         $stn->execute($vars);
+        $this->free();
         return $stn->fetch();
     }
 
@@ -73,101 +77,157 @@ class DB
         return $stn->execute($vars);
     }
 
+    // Release the content to avoid querying the last data
+    public function free()
+    {
+        $this->field = '*';
+        $this->where = ' where (1 = 1) ';
+        $this->table = $this->limit = $this->order = '';
+        $this->join = [];
+    }
+
     public function table(string $table)
     {
-        // Release the content of the option to avoid querying the last data
-        $this->options['field'] = ' * ';
-        $this->options['order'] = '';
-        $this->options['limit'] = '';
-        $this->options['where'] = '';
-        $this->options['table'] = $table;
-        return $this;
+        $this->table = $table;
+        return self::$db_instance;
     }
 
     public function field(...$fields)
     {
-        $this->options['field'] = '`' . implode('`,`', $fields) . '`';
-        return $this;
+        // Add backticks to the field name to avoid sql injection
+        $this->field = '`' . implode('`,`', $fields) . '`';
+        return self::$db_instance;
+    }
+
+    // Users can customize the field statement of the query, 
+    // but it is not safe
+    public function fieldString(string $fields)
+    {
+        $this->field = $fields;
+        return self::$db_instance;
+    }
+
+    public function join(string $table, string $condition, string $type = 'LEFT')
+    {
+        $this->join[] = $type . " JOIN " . $table . " ON " . $condition;
+        return self::$db_instance;
     }
 
     public function limit(...$limit)
     {
-        $this->options['limit'] = " LIMIT " . implode(',', $limit);
-        return $this;
+        $this->limit = " LIMIT " . implode(',', $limit);
+        return self::$db_instance;
     }
 
     public function order(string $order)
     {
-        $this->options['order'] = " ORDER BY " . $order;
-        return $this;
+        $this->order = " ORDER BY " . $order;
+        return self::$db_instance;
     }
 
-    public function where(string $where)
+    public function where($where, $sep = '', $value = '')
     {
-        if (empty($where)) {
-            ApiOutput::ApiOutput([], 10404);
+        // Add double quotes to the value to avoid sql injection
+        // 将value值加上双引号，来避免sql注入
+        if (is_array($where)) {
+            foreach ($where as $item) {
+                $this->where .= 'and ';
+                foreach ($item as $k => $v) {
+                    if ($k == 2) {
+                        if (is_string($v)) {
+                            $v = '"' . $v . '"';
+                        }
+                    }
+                    $this->where .= $v;
+                }
+            }
+        } else {
+            if (is_string($value)) {
+                $value = '"' . $value . '"';
+            }
+            $this->where .= ' and ' . $where . ' ' . $sep . ' ' . $value;
         }
-        $this->options['where'] = " WHERE " .  $where;
-        return $this;
+        $this->where = str_replace('(1 = 1) and', ' ', $this->where);
+        return self::$db_instance;
+    }
+
+    protected function getSql()
+    {
+        if (empty($this->table)) {
+            ApiOutput::ApiOutput([], 10400);
+        }
+        if (is_array($this->join)) {
+            $this->join = implode(' ', $this->join);
+        }
+        $sql = "SELECT {$this->field} 
+        FROM {$this->table}
+        {$this->join}
+        {$this->where}
+        {$this->order}
+        {$this->limit}";
+        return $sql;
     }
 
     public function get()
     {
-        if (empty($this->options['table'])) {
+        if (empty($this->table)) {
             ApiOutput::ApiOutput([], 10400);
         }
-        $sql = "SELECT {$this->options['field']} FROM
-        {$this->options['table']} {$this->options['where']}
-        {$this->options['order']} {$this->options['limit']}";
+        $sql = $this->getSql();
         return $this->query($sql);
+    }
+
+    public function getOne()
+    {
+        if (empty($this->table)) {
+            ApiOutput::ApiOutput([], 10400);
+        }
+        $sql = $this->getSql();
+        return $this->queryOne($sql);
     }
 
     public function insert(array $vars)
     {
-        if (empty($this->options['table'])) {
+        if (empty($this->table)) {
             ApiOutput::ApiOutput([], 10400);
         }
         $fields = '`' . implode('`,`', array_keys($vars)) . '`';
         $values = implode(',', array_fill(0, count($vars), '?'));
-        $sql = "INSERT INTO {$this->options['table']} ($fields) VALUES($values)";
+        $sql = "INSERT INTO {$this->table} ($fields) VALUES($values)";
         return $this->execute($sql, array_values($vars));
     }
 
     public function update(array $vars)
     {
-        if (empty($this->options['table'])) {
+        if (empty($this->table)) {
             ApiOutput::ApiOutput([], 10400);
         }
-        if (empty($this->options['where'])) {
+        if (empty($this->where)) {
             ApiOutput::ApiOutput([], 10401);
         }
-        $sql = "UPDATE {$this->options['table']} SET " . implode('=?, ', array_keys($vars)) . "=? {$this->options['where']}";
+        $sql = "UPDATE {$this->table} SET " . implode('=?, ', array_keys($vars)) . "=? {$this->where}";
         return $this->execute($sql, array_values($vars));
     }
 
     public function delete()
     {
-        if (empty($this->options['table'])) {
+        if (empty($this->table)) {
             ApiOutput::ApiOutput([], 10400);
         }
-        if (empty($this->options['where'])) {
+        if (empty($this->where)) {
             ApiOutput::ApiOutput([], 10401);
         }
-        $sql = "DELETE FROM {$this->options['table']} {$this->options['where']}";
+        $sql = "DELETE FROM {$this->table} {$this->where}";
         return $this->execute($sql);
     }
 
     public function count()
     {
-        if (empty($this->options['table'])) {
+        if (empty($this->table)) {
             ApiOutput::ApiOutput([], 10400);
         }
-        $sql = "SELECT count(*) as count FROM
-        {$this->options['table']} {$this->options['where']}";
-        $stn = self::link()->db->prepare($sql);
-        $stn->execute();
-        $row = $stn->fetch(PDO::FETCH_ASSOC);
-        return  $row['count'];
+        $sql = $this->getSql();
+        return count($this->query($sql));
     }
 
     // Output sql query, the parameter is the query method
@@ -175,10 +235,9 @@ class DB
     {
         switch ($method) {
             case 'get':
-                $sql = "SELECT {$this->options['field']} FROM
-                        {$this->options['table']} {$this->options['where']}
-                        {$this->options['order']} {$this->options['limit']}";
+                $sql = $this->getSql();
                 var_dump($sql);
+                $this->free();
                 break;
             case 'insert':
                 if (empty($data)) {
@@ -186,11 +245,13 @@ class DB
                 }
                 $fields = '`' . implode('`,`', array_keys($data)) . '`';
                 $values = implode(',', array_fill(0, count($data), '?'));
-                $sql = "INSERT INTO {$this->options['table']} ($fields) VALUES($values)";
+                $sql = "INSERT INTO {$this->table} ($fields) VALUES($values)";
                 var_dump($sql);
+                $this->free();
                 break;
             default:
                 print_r('Please pass in the correct method name');
+                $this->free();
                 break;
         }
         die;

@@ -20,20 +20,23 @@ if ($msg) {
 
 if (!file_exists(PROJECT_ROOT_PATH . "/config/database.php")) {
     $configDatabase = sprintf(
-        '<?php
-
+        "<?php
 /**
  * --------------------------------------------------------------------------------
  * MySQL database connection configuration
  * --------------------------------------------------------------------------------
  */
-define("DB_HOST", "localhost");
-define("DB_PORT", "3306");
-define("DB_USER", "root");
-define("DB_PASS", "123456");
-define("DB_NAME", "sys");
-define("DB_CHARSET", "utf8");
-        ',
+
+return [
+    'mysql' => [
+        'host' => '127.0.0.1',
+        'port' => '8889',
+        'username' => 'root',
+        'password' => 'root',
+        'dbname' => 'mydb',
+        'dbcharset' => 'utf8'
+    ]
+];",
         PHP_EOL // Line break
     );
 
