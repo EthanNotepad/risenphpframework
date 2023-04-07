@@ -11,6 +11,24 @@ class Test
     public function index()
     {
         /**
+         * Test the request function
+         */
+        if (0) {
+            $data = (new \libs\Core\Request)->getPath();
+            dump($data);
+        }
+
+        /**
+         * Test the Response function
+         */
+        if (0) {
+            $response = new \libs\Core\Response('Hello, world!', 404, [
+                'Content-Type: text/plain'
+            ]);
+            $response->send();
+        }
+
+        /**
          * Test the config function
          */
         if (0) {
@@ -111,6 +129,12 @@ class Test
         if (0) {
             $httpRequest =  new \libs\Core\HttpRequest('http://localhost:8888/risen/public/api');
             dd($httpRequest->send());
+        }
+
+        if (1) {
+            $redis = \libs\Db\RedisDB::link();
+            $redis->set('mykey', 'shejibiji.com');
+            echo $redis->get('mykey');
         }
 
         echo '<br>';
