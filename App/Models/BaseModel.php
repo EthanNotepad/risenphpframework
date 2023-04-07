@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Models;
+namespace app\Models;
 
-use App\Lib\DB;
-use App\Lib\FileLogger;
+use libs\Db\DB;
+use libs\Core\FileLogger;
 use PDOException;
 
 class BaseModel

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Tests;
+namespace app\Tests;
 
 class Test
 {
@@ -23,7 +23,7 @@ class Test
          */
         if (0) {
             $data = [
-                'name' => 'Ethan Cheng',
+                'name' => '',
             ];
 
             $rules = [
@@ -33,10 +33,10 @@ class Test
             $messages = [
                 'name.required' => 'The name field is required.',
             ];
-            $validator = new \App\Lib\Validator($data, $rules, $messages);
+            $validator = new \libs\Core\Validator($data, $rules, $messages);
             $resultValidated = $validator->validate();
             if ($resultValidated !== true) {
-                \App\Lib\ApiOutput::ApiOutput($resultValidated, 412);
+                \libs\Core\Message::send(412, $resultValidated, 'Validation failed');
             }
             echo 'moving on';
         }
@@ -47,7 +47,7 @@ class Test
         if (0) {
             $filePath = __DIR__ . '/imageData.base64';
             $imgData = file_get_contents($filePath);
-            $uploader = new \App\Lib\UploadFiles();
+            $uploader = new \libs\Core\UploadFiles();
             $imagePath = $uploader->uploadFilesBase64($imgData, 'public/upload/images/');
             echo $imagePath;
         }
@@ -58,9 +58,9 @@ class Test
         if (0) {
             $dbname = config('database.mysql.dbname');
             $ishavelogssql = "SHOW TABLES IN $dbname WHERE Tables_in_$dbname = 'logs'";
-            $result = \App\Lib\DB::link()->query($ishavelogssql);
+            $result = \libs\Db\DB::link()->query($ishavelogssql);
             if (count($result)) {
-                \App\Lib\Logger::sensitive(1);
+                \libs\Core\Logger::sensitive(1);
             } else {
                 // If there is no logs table, a logs table will be created first
                 $sql = "CREATE TABLE `logs` (
@@ -76,8 +76,8 @@ class Test
                     `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
                     PRIMARY KEY (`id`)
                   ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
-                \App\Lib\DB::link()->query($sql);
-                \App\Lib\Logger::sensitive(1);
+                \libs\Db\DB::link()->query($sql);
+                \libs\Core\Logger::sensitive(1);
             }
             echo 'moving on';
         }
@@ -88,12 +88,29 @@ class Test
         if (0) {
             $id = $_GET['id'] = "1 OR 1=1";     // test sql injection
             $whereSql[] = array('logs.id', '=', $id);
-            $getOne = \App\Lib\DB::link()->table('logs')->where('id', '=', 1)->field('id', 'user_id')->getOne();
-            $getAll = \App\Lib\DB::link()->table('logs')->where('id', '=', 1)->field('id', 'user_id')->limit(1, 100)->order("id ASC")->get();
-            $getCount = \App\Lib\DB::link()->table('logs')->where('id', '=', 3)->field('id')->count();
-            $getLeftJoin = \App\Lib\DB::link()->table('logs')->where($whereSql)->join('logs AS logs2', 'logs2.user_id = logs.id')->get();
-            $getFieldNotSafe = \App\Lib\DB::link()->table('logs')->where($whereSql)->join('logs AS logs2', 'logs2.user_id = logs.id')->fieldString('logs.id')->get();
-            $getSqlDd = \App\Lib\DB::link()->table('logs')->where('id', '=', 1)->field('id', 'user_id')->limit(1, 100)->order("id ASC")->dd('get');
+            $getOne = \libs\Db\DB::link()->table('logs')->where('id', '=', 1)->field('id', 'user_id')->getOne();
+            $getAll = \libs\Db\DB::link()->table('logs')->where('id', '=', 1)->field('id', 'user_id')->limit(1, 100)->order("id ASC")->get();
+            $getCount = \libs\Db\DB::link()->table('logs')->where('id', '=', 3)->field('id')->count();
+            $getLeftJoin = \libs\Db\DB::link()->table('logs')->where($whereSql)->join('logs AS logs2', 'logs2.user_id = logs.id')->get();
+            $getFieldNotSafe = \libs\Db\DB::link()->table('logs')->where($whereSql)->join('logs AS logs2', 'logs2.user_id = logs.id')->fieldString('logs.id')->get();
+            // $getSqlDd = \libs\Db\DB::link()->table('logs')->where('id', '=', 1)->field('id', 'user_id')->limit(1, 100)->order("id ASC")->dd('get');
+
+            // Data insertion and getting the inserted id
+            $insertData = [
+                'user_id' => '3',
+                'action' => 'login'
+            ];
+            // \libs\Db\DB::link()->table('logs')->insert($insertData);
+            $insertId = \libs\Db\DB::link()->lastId();
+            dd($insertId);
+        }
+
+        /**
+         * Test the http request function
+         */
+        if (0) {
+            $httpRequest =  new \libs\Core\HttpRequest('http://localhost:8888/risen/public/api');
+            dd($httpRequest->send());
         }
 
         echo '<br>';

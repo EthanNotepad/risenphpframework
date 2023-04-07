@@ -1,6 +1,6 @@
 <?php
 
-use App\Lib\Router;
+use libs\Core\Router;
 
 // homepage
 Router::any('/', function () {

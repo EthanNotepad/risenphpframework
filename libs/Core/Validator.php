@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Lib;
+namespace libs\Core;
 
 class Validator
 {
@@ -32,13 +32,14 @@ class Validator
                 $method = 'validate_' . $rule;
 
                 if (!method_exists($this, $method)) {
-                    ApiOutput::ApiOutput("Invalid validation rule: $rule", 412);
+                    Message::send(412, [], "Invalid validation rule: $rule");
                 }
 
                 if (!$this->$method($value, $params)) {
                     $message = isset($this->messages["$field.$rule"]) ? $this->messages["$field.$rule"] : "The $field field is invalid.";
                     $errors[$field] = $message;
 
+                    // Stop validating this field if it fails
                     break;
                 }
             }
@@ -58,7 +59,7 @@ class Validator
             return true;
         }
         if (!isset($params[0])) {
-            ApiOutput::ApiOutput("Validation rule 'min' requires a parameter.", 412);
+            Message::send(412, [], "Validation rule 'min' requires a parameter.");
         }
 
         $min = intval($params[0]);
@@ -72,7 +73,7 @@ class Validator
             return true;
         }
         if (!isset($params[0])) {
-            ApiOutput::ApiOutput("Validation rule 'max' requires a parameter.", 412);
+            Message::send(412, [], "Validation rule 'max' requires a parameter.");
         }
 
         $max = intval($params[0]);
@@ -94,8 +95,7 @@ class Validator
             return true;
         }
         if (!isset($params[0])) {
-            ApiOutput::ApiOutput("Validation rule 'date' requires a parameter.", 412);
-            // throw new Exception("Validation rule 'date' requires a parameter.");
+            Message::send(412, [], "Validation rule 'date' requires a parameter.");
         }
 
         $format = $params[0];
@@ -174,7 +174,7 @@ class Validator
     private function validate_same($value, $params)
     {
         if (!isset($params[0])) {
-            ApiOutput::ApiOutput("Validation rule 'same' requires a parameter.", 412);
+            Message::send(412, [], "Validation rule 'same' requires a parameter.");
         }
 
         $other_field = $params[0];
@@ -185,7 +185,7 @@ class Validator
     private function validate_different($value, $params)
     {
         if (!isset($params[0])) {
-            ApiOutput::ApiOutput("Validation rule 'different' requires a parameter.", 412);
+            Message::send(412, [], "Validation rule 'different' requires a parameter.");
         }
 
         $other_field = $params[0];
@@ -219,7 +219,7 @@ class Validator
             return true;
         }
         if (!isset($params[0])) {
-            ApiOutput::ApiOutput("Validation rule 'in' requires a parameter.", 412);
+            Message::send(412, [], "Validation rule 'in' requires a parameter.");
         }
 
         $allowed_values = $params;
@@ -233,7 +233,7 @@ class Validator
             return true;
         }
         if (!isset($params[0])) {
-            ApiOutput::ApiOutput("Validation rule 'not_in' requires a parameter.", 412);
+            Message::send(412, [], "Validation rule 'not_in' requires a parameter.");
         }
 
         $disallowed_values = $params;

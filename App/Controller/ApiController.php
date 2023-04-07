@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Controller;
+namespace app\Controller;
 
 class ApiController
 {
     public function index()
     {
-        \App\Lib\ApiOutput::ApiOutput('Api homepage!', 200);
-        // \App\Lib\ApiOutput::ApiOutput('Api 404', 404);
+        \libs\Core\Message::send(200, ['name' => 'Api index'], '');
+        // \libs\Core\Message::send(301, [], '');
     }
 }

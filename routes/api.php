@@ -1,9 +1,9 @@
 <?php
 
-use App\Lib\Router;
+use libs\Core\Router;
 
 // Api Homepage
-// For Testing Functions
-Router::any('/api', 'App\Controller\ApiController@index');
+Router::any('/api', 'app\Controller\ApiController@index');
 
-Router::any('/tests', 'App\Tests\Test@index');
+// For Testing Functions
+Router::any('/tests', 'app\Tests\Test@index');

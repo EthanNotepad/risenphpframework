@@ -1,4 +1,6 @@
 .DS_Store
 /.vscode/
-config/database.php
-/logs/
+/config/database.php
+/runtime/cache/*
+/logs/*
+/public/upload/images/*

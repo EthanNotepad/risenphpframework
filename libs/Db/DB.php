@@ -1,9 +1,10 @@
 <?php
 
-namespace App\Lib;
+namespace libs\Db;
 
 use PDO;
 use PDOException;
+use libs\Core\Message;
 
 class DB
 {
@@ -24,7 +25,7 @@ class DB
         // Private a clone method to prevent cloning outside the object
     }
 
-    public $db;
+    private $db;
 
     protected function config()
     {
@@ -41,7 +42,7 @@ class DB
             $this->db->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
             $this->db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         } catch (PDOException $e) {
-            ApiOutput::ApiOutput("Exception: " . $e->getMessage(), 412);
+            Message::send(412, [], "Exception: " . $e->getMessage());
         }
     }
 
@@ -58,32 +59,24 @@ class DB
     {
         $stn = self::link()->db->prepare($sql);
         $stn->execute($vars);
-        $result = $stn->fetchAll();
+        $row = $stn->fetchAll();
         $this->free();
-        return $result;
+        return $row;
     }
 
     public function queryOne(string $sql, array $vars = [])
     {
         $stn = self::link()->db->prepare($sql);
         $stn->execute($vars);
+        $row = $stn->fetch();
         $this->free();
-        return $stn->fetch();
+        return $row;
     }
 
     public function execute(string $sql, array $vars = [])
     {
         $stn = self::link()->db->prepare($sql);
-        return $stn->execute($vars);
-    }
-
-    // Release the content to avoid querying the last data
-    public function free()
-    {
-        $this->field = '*';
-        $this->where = ' where (1 = 1) ';
-        $this->table = $this->limit = $this->order = '';
-        $this->join = [];
+        return $stn->execute($vars)->rowCount();
     }
 
     public function table(string $table)
@@ -151,10 +144,77 @@ class DB
         return self::$db_instance;
     }
 
+    public function get()
+    {
+        if (empty($this->table)) {
+            Message::send(10400);
+        }
+        $sql = $this->getSql();
+        return $this->query($sql);
+    }
+
+    public function getOne()
+    {
+        if (empty($this->table)) {
+            Message::send(10400);
+        }
+        $sql = $this->getSql();
+        return $this->queryOne($sql);
+    }
+
+    public function insert(array $vars)
+    {
+        if (empty($this->table)) {
+            Message::send(10400);
+        }
+        $fields = '`' . implode('`,`', array_keys($vars)) . '`';
+        $values = implode(',', array_fill(0, count($vars), '?'));
+        $sql = "INSERT INTO {$this->table} ($fields) VALUES($values)";
+        return $this->execute($sql, array_values($vars));
+    }
+
+    public function update(array $vars)
+    {
+        if (empty($this->table)) {
+            Message::send(10400);
+        }
+        if (empty($this->where)) {
+            Message::send(10401);
+        }
+        $sql = "UPDATE {$this->table} SET " . implode('=?, ', array_keys($vars)) . "=? {$this->where}";
+        return $this->execute($sql, array_values($vars));
+    }
+
+    public function delete()
+    {
+        if (empty($this->table)) {
+            Message::send(10400);
+        }
+        if (empty($this->where)) {
+            Message::send(10401);
+        }
+        $sql = "DELETE FROM {$this->table} {$this->where}";
+        return $this->execute($sql);
+    }
+
+    public function count()
+    {
+        if (empty($this->table)) {
+            Message::send(10400);
+        }
+        $sql = $this->getSql();
+        return count($this->query($sql));
+    }
+
+    public function lastId()
+    {
+        return self::link()->db->lastInsertId() ?? 0;
+    }
+
     protected function getSql()
     {
         if (empty($this->table)) {
-            ApiOutput::ApiOutput([], 10400);
+            Message::send(10400);
         }
         if (is_array($this->join)) {
             $this->join = implode(' ', $this->join);
@@ -168,66 +228,13 @@ class DB
         return $sql;
     }
 
-    public function get()
+    // Release the content to avoid querying the last data
+    protected function free()
     {
-        if (empty($this->table)) {
-            ApiOutput::ApiOutput([], 10400);
-        }
-        $sql = $this->getSql();
-        return $this->query($sql);
-    }
-
-    public function getOne()
-    {
-        if (empty($this->table)) {
-            ApiOutput::ApiOutput([], 10400);
-        }
-        $sql = $this->getSql();
-        return $this->queryOne($sql);
-    }
-
-    public function insert(array $vars)
-    {
-        if (empty($this->table)) {
-            ApiOutput::ApiOutput([], 10400);
-        }
-        $fields = '`' . implode('`,`', array_keys($vars)) . '`';
-        $values = implode(',', array_fill(0, count($vars), '?'));
-        $sql = "INSERT INTO {$this->table} ($fields) VALUES($values)";
-        return $this->execute($sql, array_values($vars));
-    }
-
-    public function update(array $vars)
-    {
-        if (empty($this->table)) {
-            ApiOutput::ApiOutput([], 10400);
-        }
-        if (empty($this->where)) {
-            ApiOutput::ApiOutput([], 10401);
-        }
-        $sql = "UPDATE {$this->table} SET " . implode('=?, ', array_keys($vars)) . "=? {$this->where}";
-        return $this->execute($sql, array_values($vars));
-    }
-
-    public function delete()
-    {
-        if (empty($this->table)) {
-            ApiOutput::ApiOutput([], 10400);
-        }
-        if (empty($this->where)) {
-            ApiOutput::ApiOutput([], 10401);
-        }
-        $sql = "DELETE FROM {$this->table} {$this->where}";
-        return $this->execute($sql);
-    }
-
-    public function count()
-    {
-        if (empty($this->table)) {
-            ApiOutput::ApiOutput([], 10400);
-        }
-        $sql = $this->getSql();
-        return count($this->query($sql));
+        $this->field = '*';
+        $this->where = ' where (1 = 1) ';
+        $this->table = $this->limit = $this->order = '';
+        $this->join = [];
     }
 
     // Output sql query, the parameter is the query method
@@ -241,11 +248,24 @@ class DB
                 break;
             case 'insert':
                 if (empty($data)) {
-                    ApiOutput::ApiOutput([], 10402);
+                    Message::send(10402);
                 }
                 $fields = '`' . implode('`,`', array_keys($data)) . '`';
                 $values = implode(',', array_fill(0, count($data), '?'));
                 $sql = "INSERT INTO {$this->table} ($fields) VALUES($values)";
+                var_dump($sql);
+                $this->free();
+                break;
+            case 'update':
+                if (empty($data)) {
+                    Message::send(10402);
+                }
+                $sql = "UPDATE {$this->table} SET " . implode('=?, ', array_keys($data)) . "=? {$this->where}";
+                var_dump($sql);
+                $this->free();
+                break;
+            case 'delete':
+                $sql = "DELETE FROM {$this->table} {$this->where}";
                 var_dump($sql);
                 $this->free();
                 break;

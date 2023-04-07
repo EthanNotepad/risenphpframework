@@ -1,8 +1,9 @@
 <?php
 
-namespace App\Lib;
+namespace libs\Core;
 
 use PDOException;
+use libs\Db\DB;
 
 class Logger
 {
