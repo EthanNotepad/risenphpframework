@@ -1,6 +1,7 @@
 <?php
 
 use libs\Core\Router;
+use libs\Core\Middleware\YourMiddleware;
 
 // homepage
 Router::any('/', function () {
@@ -15,7 +16,7 @@ Router::any('/', function () {
 // include_once PROJECT_ROOT_PATH . "/routes/api.php";
 
 // Api Homepage
-Router::any('/api', 'app\Controller\ApiController@index')->middleware(YourMiddleware::class);
+Router::any('/api', 'app\Controller\ApiController@index', YourMiddleware::class);
 
 // For Testing Functions
 Router::any('/tests', 'app\Tests\Test@index');
