@@ -1,6 +1,5 @@
 .DS_Store
 /.vscode/
-/config/database.php
 /.env
 /runtime/cache/*
 /logs/*
