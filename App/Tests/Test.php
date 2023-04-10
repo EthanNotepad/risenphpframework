@@ -134,7 +134,7 @@ class Test
         /**
          * Test the Redis function
          */
-        if (0) {
+        if (1) {
             $redis = \libs\Db\RedisDB::link();
             $redis->set('mykey', 'shejibiji.com');
             echo $redis->get('mykey');
