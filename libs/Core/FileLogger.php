@@ -12,8 +12,8 @@ class FileLogger
         // and the string from the arguments
         $message = sprintf(
             '[%s] [%s] %s%s',
-            $level,
             $dateFormatted,
+            $level,
             $message,
             PHP_EOL // Line break
         );
