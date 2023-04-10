@@ -8,7 +8,7 @@ use libs\Core\Message;
 
 class DB
 {
-    protected static $dbCofig;
+    protected static $dbConfig;
 
     // Private a static variable to determine whether to instantiate
     private static $db_instance;
@@ -30,14 +30,21 @@ class DB
     protected function config()
     {
 
-        return sprintf("mysql:host=%s;dbname=%s;chartset=%s;port=%s", self::$dbCofig['host'], self::$dbCofig['dbname'], self::$dbCofig['dbcharset'], self::$dbCofig['port']);
+        return sprintf("mysql:host=%s;dbname=%s;chartset=%s;port=%s", self::$dbConfig['host'], self::$dbConfig['dbname'], self::$dbConfig['dbcharset'], self::$dbConfig['port']);
     }
 
     private function __construct()
     {
         try {
-            self::$dbCofig = config('database.mysql');
-            $this->db = new PDO($this->config(), self::$dbCofig['username'], self::$dbCofig['password']);
+            if (config('useEnv')) {
+                self::$dbConfig = env('mysql');
+                if (empty(self::$dbConfig)) {
+                    self::$dbConfig = config('database.mysql');
+                }
+            } else {
+                self::$dbConfig = config('database.mysql');
+            }
+            $this->db = new PDO($this->config(), self::$dbConfig['username'], self::$dbConfig['password']);
             // get only associative array
             $this->db->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
             $this->db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);

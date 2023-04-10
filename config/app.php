@@ -14,6 +14,12 @@ return [
     'displayErrors' => true,
 
     /**
+     * whether to use the environment variable
+     * 是否使用本地环境变量，默认开启
+     */
+    'useEnv' => true,
+
+    /**
      * Whether to customize the time zone, it is not enabled by default
      * 是否自定义时区，默认不打开
      */

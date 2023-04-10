@@ -32,13 +32,33 @@ if (!function_exists('config')) {
     {
         $pathAndValue = explode('.', $key, 2);
         if (count($pathAndValue) == 1) {
-            $config_file = 'config';
+            // If the configuration file is not specified, the default is app.php
+            $config_file = 'app';
             $param = $pathAndValue[0];
         } else {
             $config_file = $pathAndValue[0];
             $param  = $pathAndValue[1];
         }
         $config_path = PROJECT_ROOT_PATH . '/config/' . $config_file . '.php';
+        if (file_exists($config_path)) {
+            $config = include($config_path);
+            return $config[$param] ?? $default_val;
+        } else {
+            return $default_val;
+        }
+    }
+}
+
+/**
+ * --------------------------------------------------------------------------------
+ * Read the defined array data in the .env file
+ * if the .env file does not exist, return the default value
+ * --------------------------------------------------------------------------------
+ */
+if (!function_exists('env')) {
+    function env($param, $default_val = null)
+    {
+        $config_path = PROJECT_ROOT_PATH . '.env';
         if (file_exists($config_path)) {
             $config = include($config_path);
             return $config[$param] ?? $default_val;
