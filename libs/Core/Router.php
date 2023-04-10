@@ -57,11 +57,6 @@ class Router
     {
         self::getRoot();
         $uri = rtrim(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), '/');
-        // FIXME When the root domain name is '', the home page cannot be accessed correctly @Sheng
-        // This is a temporary solution
-        if ($uri == '') {
-            $uri = '/';
-        }
         if (!empty(self::$root) && self::$root !== '/') {
             self::$root = rtrim(self::$root, '/');
             if (self::$root === $uri) {
@@ -70,6 +65,9 @@ class Router
                 // Remove the root directory from uri
                 $uri = substr_replace($uri, '', strpos($uri, self::$root), strlen(self::$root));
             }
+        }
+        if ($uri == '') {
+            $uri = '/';
         }
         $method = $_SERVER['REQUEST_METHOD'];
 
@@ -192,7 +190,7 @@ class Router
     public static function getRoot()
     {
         if (self::$root === null) {
-            self::$root = implode('/', array_slice(explode('/', $_SERVER['SCRIPT_NAME']), 0, -1)) . '/';
+            self::$root = implode('/', array_slice(explode('/', $_SERVER['SCRIPT_NAME']), 0, -1));
         }
         return self::$root;
     }

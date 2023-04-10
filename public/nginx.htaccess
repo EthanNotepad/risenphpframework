@@ -1,0 +1,5 @@
+rewrite ^/(.*)/$ /$1 redirect;
+
+if (!-e $request_filename){
+	rewrite ^(.*)$ /index.php break;
+}

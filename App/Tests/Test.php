@@ -131,10 +131,30 @@ class Test
             dd($httpRequest->send());
         }
 
-        if (1) {
+        /**
+         * Test the Redis function
+         */
+        if (0) {
             $redis = \libs\Db\RedisDB::link();
             $redis->set('mykey', 'shejibiji.com');
             echo $redis->get('mykey');
+        }
+
+        /**
+         * Test the LDAP function
+         */
+        if (0) {
+            $ldapconn = ldap_connect("ldap://ldap.wqzbxh.site");
+            // 绑定到LDAP服务器
+            // ldap_bind($ldapconn, "cn=wqzbxh,dc=ldap.wqzbxh,dc=site", "admin123");
+            // 搜索LDAP目录
+            $search_results = ldap_search($ldapconn, "dc=ldap.wqzbxh,dc=site", "(&(objectClass=person)(uid=14))");
+            // 获取搜索结果
+            $entries = ldap_get_entries($ldapconn, $search_results);
+            // 输出搜索结果
+            var_dump($entries);
+            // 断开LDAP连接
+            ldap_unbind($ldapconn);
         }
 
         echo '<br>';
