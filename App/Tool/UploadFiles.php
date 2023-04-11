@@ -16,9 +16,7 @@ class UploadFiles
                 $type = 'ico';
             }
             $pathDir = PROJECT_ROOT_PATH . $path . date('Ymd', time()) . "/";
-            if (!is_dir($pathDir)) {
-                mkdir($pathDir, 0777, true);
-            }
+            createFolder($pathDir);
             $ranNumber = generateNonUniqueNumber(3);
             $time = time();
             $ranKey = $ranNumber . substr($time, 7);

@@ -37,7 +37,12 @@ class DB implements CoreDB
     {
         try {
             if (config('isUseEnv')) {
-                self::$dbConfig = env('mysql');
+                self::$dbConfig['host'] = getenv('HOSTNAME');
+                self::$dbConfig['dbname'] = getenv('DATABASE');
+                self::$dbConfig['username'] = getenv('USERNAME');
+                self::$dbConfig['password'] = getenv('PASSWORD');
+                self::$dbConfig['dbcharset'] = getenv('CHARSET');
+                self::$dbConfig['port'] = getenv('HOSTPORT');
                 if (empty(self::$dbConfig)) {
                     self::$dbConfig = config('database.mysql');
                 }

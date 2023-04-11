@@ -51,25 +51,6 @@ if (!function_exists('config')) {
 
 /**
  * --------------------------------------------------------------------------------
- * Read the defined array data in the .env file
- * if the .env file does not exist, return the default value
- * --------------------------------------------------------------------------------
- */
-if (!function_exists('env')) {
-    function env($param, $default_val = null)
-    {
-        $config_path = PROJECT_ROOT_PATH . '.env';
-        if (file_exists($config_path)) {
-            $config = include($config_path);
-            return $config[$param] ?? $default_val;
-        } else {
-            return $default_val;
-        }
-    }
-}
-
-/**
- * --------------------------------------------------------------------------------
  * generate a unique number
  * --------------------------------------------------------------------------------
  */
@@ -81,5 +62,19 @@ if (!function_exists('generateNonUniqueNumber')) {
             $number .= mt_rand(0, 9); // append a random digit to the number
         }
         return $number;
+    }
+}
+
+/**
+ * --------------------------------------------------------------------------------
+ * create a folder
+ * --------------------------------------------------------------------------------
+ */
+if (!function_exists('createFolder')) {
+    function createFolder($folderName)
+    {
+        if (!file_exists($folderName)) {
+            mkdir($folderName, 0777, true);
+        }
     }
 }

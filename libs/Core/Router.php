@@ -79,11 +79,10 @@ class Router
         return self::$root;
     }
 
-    public static function dispatch()
+    public static function processUri()
     {
         // Get the root directory of the website
         $rootUri = self::getRoot();
-
         // To avoid entering '/' at the end of the uri
         $uri = rtrim(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), '/');
 
@@ -102,171 +101,32 @@ class Router
             $uri = '/';
         }
 
-        $method = $_SERVER['REQUEST_METHOD'];
-
-        $searches = array_keys(static::$patterns);
-        $replaces = array_values(static::$patterns);
-
-        $found_route = false;
-
-        self::$routes = preg_replace('/\/+/', '/', self::$routes);
-
-        FileLogger::info('User sends API request: [' . $method . '] ' . $uri);
-
-        // Check if route is defined without regex
-        if (in_array($uri, self::$routes)) {
-            $route_pos = array_keys(self::$routes, $uri);
-
-            // The same url can match multiple pieces of data
-            foreach ($route_pos as $route) {
-
-                // Using an ANY option to match both GET and POST requests
-                if (self::$methods[$route] == $method || self::$methods[$route] == 'ANY' || (!empty(self::$maps[$route]) && in_array($method, self::$maps[$route]))) {
-                    $found_route = true;
-
-                    // If there is a middleware passed, 
-                    // execute the middleware first
-                    if (!is_null(self::$middleware[$route])) {
-                        $middleware = self::$middleware[$route];
-                        if (is_subclass_of($middleware, MiddlewareInterface::class)) {
-                            $middlewareObj = new $middleware;
-                            $middlewareObj->handle();
-                        } else {
-                            throw new Exception("Invalid middleware class: $middleware");
-                        }
-                    }
-
-                    // If route is not an object
-                    if (!is_object(self::$callbacks[$route])) {
-
-                        // Grab all parts based on a / separator
-                        $parts = explode('/', self::$callbacks[$route]);
-
-                        // Collect the last index of the array
-                        $last = end($parts);
-
-                        // Grab the controller name and method call
-                        $segments = explode('@', $last);
-
-                        // Instanitate controller
-                        $controller = new $segments[0]();
-
-                        // Call method
-                        $controller->{$segments[1]}();
-
-                        if (self::$halts) return;
-                    } else {
-                        // Call closure
-                        call_user_func(self::$callbacks[$route]);
-
-                        if (self::$halts) return;
-                    }
-                }
-            }
-        } else {
-            // Check if defined with regex
-            $pos = 0;
-            foreach (self::$routes as $route) {
-                if (strpos($route, ':') !== false) {
-                    $route = str_replace($searches, $replaces, $route);
-                }
-
-                if (preg_match('#^' . $route . '$#', $uri, $matched)) {
-                    if (self::$methods[$pos] == $method || self::$methods[$pos] == 'ANY' || (!empty(self::$maps[$pos]) && in_array($method, self::$maps[$pos]))) {
-                        $found_route = true;
-
-                        // Remove $matched[0] as [1] is the first parameter.
-                        array_shift($matched);
-
-                        // If there is a middleware passed, 
-                        // execute the middleware first
-                        if (!is_null(self::$middleware[$pos])) {
-                            $middleware = self::$middleware[$pos];
-                            if (is_subclass_of($middleware, MiddlewareInterface::class)) {
-                                $middlewareObj = new $middleware;
-                                $middlewareObj->handle();
-                            } else {
-                                throw new Exception("Invalid middleware class: $middleware");
-                            }
-                        }
-
-                        if (!is_object(self::$callbacks[$pos])) {
-
-                            // Grab all parts based on a / separator
-                            $parts = explode('/', self::$callbacks[$pos]);
-
-                            // Collect the last index of the array
-                            $last = end($parts);
-
-                            // Grab the controller name and method call
-                            $segments = explode('@', $last);
-
-                            // Instanitate controller
-                            $controller = new $segments[0]();
-
-                            // Fix multi parameters
-                            if (!method_exists($controller, $segments[1])) {
-                                echo "controller and action not found";
-                            } else {
-                                call_user_func_array(array($controller, $segments[1]), $matched);
-                            }
-
-                            if (self::$halts) return;
-                        } else {
-                            call_user_func_array(self::$callbacks[$pos], $matched);
-
-                            if (self::$halts) return;
-                        }
-                    }
-                }
-                $pos++;
-            }
-        }
-
-        // Run the error callback if the route was not found
-        if ($found_route == false) {
-            FileLogger::warning('invalid request url: [' . $method . '] ' . $uri);
-            if (!self::$error_callback) {
-                self::$error_callback = function () {
-                    header($_SERVER['SERVER_PROTOCOL'] . " 404 Not Found");
-                    Message::send(404, [], 'The requested URL ' . $_SERVER['REQUEST_URI'] . ' was not found on this server.');
-                };
-            } else {
-                if (is_string(self::$error_callback)) {
-                    self::get($_SERVER['REQUEST_URI'], self::$error_callback);
-                    self::$error_callback = null;
-                    self::dispatch();
-                    return;
-                }
-            }
-            call_user_func(self::$error_callback);
-        }
+        return $uri;
     }
 
-    public static function dispatch4cache()
+    public static function processConfig()
     {
-        global $_CONFIG_ROUTE;
-
-        // Get the root directory of the website
-        $rootUri = self::getRoot();
-
-        // To avoid entering '/' at the end of the uri
-        $uri = rtrim(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), '/');
-
-        // Remove the root directory from uri
-        if (!empty($rootUri) && $rootUri !== '/') {
-            $rootUri = rtrim($rootUri, '/');
-            if ($rootUri === $uri) {
-                $uri = '/';
-            } else {
-                $uri = substr_replace($uri, '', strpos($uri, $rootUri), strlen($rootUri));
-            }
+        if (config('isCacheConfig')) {
+            global $_CONFIG_ROUTE;
+            $routesConfig =  $_CONFIG_ROUTE;
+        } else {
+            $routesConfig['routes'] = self::$routes;
+            $routesConfig['halts'] = self::$halts;
+            $routesConfig['methods'] = self::$methods;
+            $routesConfig['callbacks'] = self::$callbacks;
+            $routesConfig['middleware'] = self::$middleware;
+            $routesConfig['maps'] = self::$maps;
+            $routesConfig['error_callback'] = self::$error_callback;
         }
 
-        // If the uri is empty, set it to '/'
-        if ($uri == '') {
-            $uri = '/';
-        }
+        return $routesConfig;
+    }
+
+    public static function dispatch()
+    {
+        $uri = self::processUri();
+
+        $routesConfig = self::processConfig();
 
         $method = $_SERVER['REQUEST_METHOD'];
 
@@ -275,25 +135,23 @@ class Router
 
         $found_route = false;
 
-        $_CONFIG_ROUTE['routes'] = preg_replace('/\/+/', '/', $_CONFIG_ROUTE['routes']);
-
-        FileLogger::info('User sends API request: [' . $method . '] ' . $uri);
+        $routesConfig['routes'] = preg_replace('/\/+/', '/', $routesConfig['routes']);
 
         // Check if route is defined without regex
-        if (in_array($uri, $_CONFIG_ROUTE['routes'])) {
-            $route_pos = array_keys($_CONFIG_ROUTE['routes'], $uri);
+        if (in_array($uri, $routesConfig['routes'])) {
+            $route_pos = array_keys($routesConfig['routes'], $uri);
 
             // The same url can match multiple pieces of data
             foreach ($route_pos as $route) {
 
                 // Using an ANY option to match both GET and POST requests
-                if ($_CONFIG_ROUTE['methods'][$route] == $method || $_CONFIG_ROUTE['methods'][$route] == 'ANY' || (!empty($_CONFIG_ROUTE['maps'][$route]) && in_array($method, $_CONFIG_ROUTE['maps'][$route]))) {
+                if ($routesConfig['methods'][$route] == $method || $routesConfig['methods'][$route] == 'ANY' || (!empty($routesConfig['maps'][$route]) && in_array($method, $routesConfig['maps'][$route]))) {
                     $found_route = true;
 
                     // If there is a middleware passed, 
                     // execute the middleware first
-                    if (!is_null($_CONFIG_ROUTE['middleware'][$route])) {
-                        $middleware = $_CONFIG_ROUTE['middleware'][$route];
+                    if (!is_null($routesConfig['middleware'][$route])) {
+                        $middleware = $routesConfig['middleware'][$route];
                         if (is_subclass_of($middleware, MiddlewareInterface::class)) {
                             $middlewareObj = new $middleware;
                             $middlewareObj->handle();
@@ -303,11 +161,11 @@ class Router
                     }
 
                     // If route is not an object
-                    if (!is_object($_CONFIG_ROUTE['callbacks'][$route])) {
+                    if (!is_object($routesConfig['callbacks'][$route])) {
 
 
                         // Grab all parts based on a / separator
-                        $parts = explode('/', $_CONFIG_ROUTE['callbacks'][$route]);
+                        $parts = explode('/', $routesConfig['callbacks'][$route]);
                         // dd($route);
 
                         // Collect the last index of the array
@@ -322,25 +180,25 @@ class Router
                         // Call method
                         $controller->{$segments[1]}();
 
-                        if ($_CONFIG_ROUTE['halts']) return;
+                        if ($routesConfig['halts']) return;
                     } else {
                         // Call closure
-                        call_user_func($_CONFIG_ROUTE['callbacks'][$route]);
+                        call_user_func($routesConfig['callbacks'][$route]);
 
-                        if ($_CONFIG_ROUTE['halts']) return;
+                        if ($routesConfig['halts']) return;
                     }
                 }
             }
         } else {
             // Check if defined with regex
             $pos = 0;
-            foreach ($_CONFIG_ROUTE['routes'] as $route) {
+            foreach ($routesConfig['routes'] as $route) {
                 if (strpos($route, ':') !== false) {
                     $route = str_replace($searches, $replaces, $route);
                 }
 
                 if (preg_match('#^' . $route . '$#', $uri, $matched)) {
-                    if ($_CONFIG_ROUTE['methods'][$pos] == $method || $_CONFIG_ROUTE['methods'][$pos] == 'ANY' || (!empty($_CONFIG_ROUTE['maps'][$pos]) && in_array($method, $_CONFIG_ROUTE['maps'][$pos]))) {
+                    if ($routesConfig['methods'][$pos] == $method || $routesConfig['methods'][$pos] == 'ANY' || (!empty($routesConfig['maps'][$pos]) && in_array($method, $routesConfig['maps'][$pos]))) {
                         $found_route = true;
 
                         // Remove $matched[0] as [1] is the first parameter.
@@ -348,8 +206,8 @@ class Router
 
                         // If there is a middleware passed, 
                         // execute the middleware first
-                        if (!is_null($_CONFIG_ROUTE['middleware'][$pos])) {
-                            $middleware = $_CONFIG_ROUTE['middleware'][$pos];
+                        if (!is_null($routesConfig['middleware'][$pos])) {
+                            $middleware = $routesConfig['middleware'][$pos];
                             if (is_subclass_of($middleware, MiddlewareInterface::class)) {
                                 $middlewareObj = new $middleware;
                                 $middlewareObj->handle();
@@ -358,10 +216,10 @@ class Router
                             }
                         }
 
-                        if (!is_object($_CONFIG_ROUTE['callbacks'][$pos])) {
+                        if (!is_object($routesConfig['callbacks'][$pos])) {
 
                             // Grab all parts based on a / separator
-                            $parts = explode('/', $_CONFIG_ROUTE['callbacks'][$pos]);
+                            $parts = explode('/', $routesConfig['callbacks'][$pos]);
 
                             // Collect the last index of the array
                             $last = end($parts);
@@ -379,11 +237,11 @@ class Router
                                 call_user_func_array(array($controller, $segments[1]), $matched);
                             }
 
-                            if ($_CONFIG_ROUTE['halts']) return;
+                            if ($routesConfig['halts']) return;
                         } else {
-                            call_user_func_array($_CONFIG_ROUTE['callbacks'][$pos], $matched);
+                            call_user_func_array($routesConfig['callbacks'][$pos], $matched);
 
-                            if ($_CONFIG_ROUTE['halts']) return;
+                            if ($routesConfig['halts']) return;
                         }
                     }
                 }
@@ -391,23 +249,25 @@ class Router
             }
         }
 
+        FileLogger::info('User sends API request: [' . $method . '] ' . $uri);
+
         // Run the error callback if the route was not found
         if ($found_route == false) {
             FileLogger::warning('invalid request url: [' . $method . '] ' . $uri);
-            if (!$_CONFIG_ROUTE['error_callback']) {
-                $_CONFIG_ROUTE['error_callback'] = function () {
+            if (!$routesConfig['error_callback']) {
+                $routesConfig['error_callback'] = function () {
                     header($_SERVER['SERVER_PROTOCOL'] . " 404 Not Found");
                     Message::send(404, [], 'The requested URL ' . $_SERVER['REQUEST_URI'] . ' was not found on this server.');
                 };
             } else {
-                if (is_string($_CONFIG_ROUTE['error_callback'])) {
-                    self::get($_SERVER['REQUEST_URI'], $_CONFIG_ROUTE['error_callback']);
-                    $_CONFIG_ROUTE['error_callback'] = null;
+                if (is_string($routesConfig['error_callback'])) {
+                    self::get($_SERVER['REQUEST_URI'], $routesConfig['error_callback']);
+                    $routesConfig['error_callback'] = null;
                     self::dispatch();
                     return;
                 }
             }
-            call_user_func($_CONFIG_ROUTE['error_callback']);
+            call_user_func($routesConfig['error_callback']);
         }
     }
 }

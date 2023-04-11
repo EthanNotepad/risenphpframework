@@ -19,9 +19,7 @@ class FileLogger
         );
 
         $pathLogs = PROJECT_ROOT_PATH . '/logs';
-        if (!is_dir($pathLogs)) {
-            mkdir($pathLogs, 0777, true);
-        }
+        createFolder($pathLogs);
 
         // Use a log file name that includes the user ID if available
         $file = $pathLogs . '/' . 'Daily_' . date('Y_m_d') . '.log';
