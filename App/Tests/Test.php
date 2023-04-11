@@ -32,8 +32,10 @@ class Test
          * Test the config function
          */
         if (0) {
+            global $_CONFIG;
             $displayErrors = config('app.displayErrors');
-            dump($displayErrors);
+            $displayErrorsFromGlobalConfig = $_CONFIG['app'];
+            dump($displayErrors, $displayErrorsFromGlobalConfig);
         }
 
         /**
@@ -41,17 +43,27 @@ class Test
          */
         if (0) {
             $data = [
-                'name' => '',
+                'name' => 'hahh',
+                'age' => '12',
+                'email' => 'svip2011@qq.com',
             ];
 
             $rules = [
                 'name' => ['required'],
+                'age' => ['required', 'numeric', 'min:18'],
+                'email' => ['required', 'email'],
             ];
 
             $messages = [
                 'name.required' => 'The name field is required.',
+                'age.required' => 'The age field is required.',
+                'age.numeric' => 'The age field must be a number.',
+                'age.min' => 'The age field must be at least 18.',
+                'email.required' => 'The email field is required.',
+                'email.email' => 'The email field must be a valid email address.',
             ];
             $validator = new \libs\Core\Validator($data, $rules, $messages);
+            $validator->setFields(['name', 'age']);
             $resultValidated = $validator->validate();
             if ($resultValidated !== true) {
                 \libs\Core\Message::send(412, $resultValidated, 'Validation failed');
@@ -65,7 +77,7 @@ class Test
         if (0) {
             $filePath = __DIR__ . '/imageData.base64';
             $imgData = file_get_contents($filePath);
-            $uploader = new \libs\Core\UploadFiles();
+            $uploader = new \app\Tool\UploadFiles();
             $imagePath = $uploader->uploadFilesBase64($imgData, 'public/upload/images/');
             echo $imagePath;
         }
@@ -136,6 +148,15 @@ class Test
          */
         if (0) {
             $redis = \libs\Db\RedisDB::link();
+            $redis->set('mykey', 'shejibiji.com');
+            echo $redis->get('mykey');
+        }
+
+        /**
+         * Test the NoSql factory function
+         */
+        if (0) {
+            $redis = \libs\Factory\NosqlFactory::factory('redis');
             $redis->set('mykey', 'shejibiji.com');
             echo $redis->get('mykey');
         }

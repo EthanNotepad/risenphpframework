@@ -5,7 +5,7 @@ namespace libs\Db;
 use Redis;
 use RedisException;
 
-class RedisDB
+class RedisDB implements CoreDB
 {
     protected static $dbConfig;
 
@@ -13,7 +13,7 @@ class RedisDB
 
     private function __construct()
     {
-        if (config('useEnv')) {
+        if (config('isUseEnv')) {
             self::$dbConfig = env('redis');
             if (empty(self::$dbConfig)) {
                 self::$dbConfig = config('database.redis');
@@ -38,30 +38,5 @@ class RedisDB
             new self;
         }
         return self::$redis;
-    }
-
-    public function set($key, $value)
-    {
-        return self::link()->set($key, $value);
-    }
-
-    public function get($key)
-    {
-        return self::link()->get($key);
-    }
-
-    public function delete($key)
-    {
-        return self::link()->delete($key);
-    }
-
-    public function keys($pattern)
-    {
-        return self::link()->keys($pattern);
-    }
-
-    public function flushAll()
-    {
-        return self::link()->flushAll();
     }
 }

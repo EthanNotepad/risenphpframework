@@ -3,28 +3,19 @@
 /**
  * --------------------------------------------------------------------------------
  * This configuration mainly stores parameters related to environment configuration
+ * isCacheConfig: 
+ *     Whether to cache the configuration file
+ *     if true, the configuration file will be cached in the runtime/cache/config file
+ *     note: After the cache is enabled, the closure function cannot be used in the route, 
+ *         and it will not be cached correctly
  * --------------------------------------------------------------------------------
  */
 
 return [
-    /**
-     * Whether to open php debugging error message
-     * 是否打开php调试错误信息，默认开启
-     */
+    'appName' => 'Framwork',
     'displayErrors' => true,
-
-    /**
-     * whether to use the environment variable
-     * 是否使用本地环境变量，默认开启
-     */
-    'useEnv' => true,
-
-    /**
-     * Whether to customize the time zone, it is not enabled by default
-     * 是否自定义时区，默认不打开
-     */
-    // Whether to customize the time zone
+    'isUseEnv' => true,
     'isConfigTimeZone' => false,
-    // custom time zone here like “PRC” or “Asia/Shanghai”
     'defaultTimeZone' => 'PRC',
+    'isCacheConfig' => false,
 ];

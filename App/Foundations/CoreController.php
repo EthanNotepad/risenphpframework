@@ -4,7 +4,7 @@ namespace app\Foundations;
 
 use libs\Core\Request;
 
-class CoreController
+abstract class CoreController
 {
     protected $request;
     public function __construct()

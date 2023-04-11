@@ -6,7 +6,7 @@ use PDO;
 use PDOException;
 use libs\Core\Message;
 
-class DB
+class DB implements CoreDB
 {
     protected static $dbConfig;
 
@@ -36,7 +36,7 @@ class DB
     private function __construct()
     {
         try {
-            if (config('useEnv')) {
+            if (config('isUseEnv')) {
                 self::$dbConfig = env('mysql');
                 if (empty(self::$dbConfig)) {
                     self::$dbConfig = config('database.mysql');

@@ -1,6 +1,6 @@
 <?php
 
-namespace libs\Core;
+namespace app\Tool;
 
 class UploadFiles
 {

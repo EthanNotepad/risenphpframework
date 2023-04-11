@@ -9,11 +9,14 @@ use libs\Core\Router;
 
 // If set to false, 
 // it will be executed when multiple urls are matched
-// Router::haltOnMatch(true);
+Router::haltOnMatch(true);
 
 // homepage
 Router::get('/', function () {
-    echo 'Hello Risen!';
+    global $_CONFIG;
+    $appName = $_CONFIG['app']['appName'];
+    echo "<h1 style='margin:20px;color:#535353;font:24px/1.2 Helvetica, Arial'>
+    <span style='font-size:150px;'>:)</span><br/>Hello, $appName!</h1>";
 });
 
 Router::map(array('get', 'post', 'put'), '/', function () {
@@ -32,5 +35,3 @@ Router::any('/api', 'app\Controller\ApiController@index', \app\Middleware\Exampl
 
 // For Testing Functions
 Router::any('/tests', 'app\Tests\Test@index');
-
-Router::dispatch();
