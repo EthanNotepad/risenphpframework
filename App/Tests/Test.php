@@ -13,7 +13,7 @@ class Test
         /**
          * Test the request function
          */
-        if (1) {
+        if (0) {
             $data = (new \libs\Core\Request)->getPath();
             dd($data);
         }
@@ -119,6 +119,7 @@ class Test
             $id = $_GET['id'] = "1 OR 1=1";     // test sql injection
             $whereSql[] = array('logs.id', '=', $id);
             $getOne = \libs\Db\DB::link()->table('logs')->where('id', '=', 59)->field('id', 'user_id')->getOne();
+            // dd($getOne);
             $getAll = \libs\Db\DB::link()->table('logs')->where('id', '=', 1)->field('id', 'user_id')->limit(1, 100)->order("id ASC")->get();
             $getCount = \libs\Db\DB::link()->table('logs')->where('id', '=', 3)->field('id')->count();
             $getLeftJoin = \libs\Db\DB::link()->table('logs')->where($whereSql)->join('logs AS logs2', 'logs2.user_id = logs.id')->get();

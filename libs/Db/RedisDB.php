@@ -13,7 +13,8 @@ class RedisDB implements CoreDB
 
     private function __construct()
     {
-        self::$dbConfig = config('database.redis');
+        global $_CONFIG;
+        self::$dbConfig = $_CONFIG['database']['redis']['default'];
         self::$redis = new Redis();
         try {
             self::$redis->connect(self::$dbConfig['host'], self::$dbConfig['port']);

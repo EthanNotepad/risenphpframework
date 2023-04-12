@@ -29,26 +29,13 @@ class DB implements CoreDB
 
     protected function config()
     {
-
         return sprintf("mysql:host=%s;dbname=%s;chartset=%s;port=%s", self::$dbConfig['host'], self::$dbConfig['dbname'], self::$dbConfig['dbcharset'], self::$dbConfig['port']);
     }
 
     private function __construct()
     {
         try {
-            if (config('isUseEnv')) {
-                self::$dbConfig['host'] = getenv('HOSTNAME');
-                self::$dbConfig['dbname'] = getenv('DATABASE');
-                self::$dbConfig['username'] = getenv('USERNAME');
-                self::$dbConfig['password'] = getenv('PASSWORD');
-                self::$dbConfig['dbcharset'] = getenv('CHARSET');
-                self::$dbConfig['port'] = getenv('HOSTPORT');
-                if (empty(self::$dbConfig)) {
-                    self::$dbConfig = config('database.mysql');
-                }
-            } else {
-                self::$dbConfig = config('database.mysql');
-            }
+            self::$dbConfig = self::loadConfig();
             $this->db = new PDO($this->config(), self::$dbConfig['username'], self::$dbConfig['password']);
             // get only associative array
             $this->db->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
@@ -56,6 +43,47 @@ class DB implements CoreDB
         } catch (PDOException $e) {
             Message::send(412, [], "Exception: " . $e->getMessage());
         }
+    }
+
+    public static function loadConfig()
+    {
+        global $_CONFIG;
+        if ($_CONFIG['app']['isUseEnv']) {
+            $conConfig = [
+                'host' => getenv('HOSTNAME'),
+                'port' => getenv('HOSTPORT'),
+                'username' => getenv('USERNAME'),
+                'password' => getenv('PASSWORD'),
+                'dbname' => getenv('DATABASE'),
+                'dbcharset' => getenv('CHARSET'),
+            ];
+            if (empty($conConfig['host'])) {
+                switch ($_CONFIG['database']['default']) {
+                    case 'mysql':
+                        $conConfig = $_CONFIG['database']['connections']['mysql'];
+                        break;
+                    case 'mariadb':
+                        $conConfig = $_CONFIG['database']['connections']['mariadb'];
+                        break;
+                    default:
+                        $conConfig = $_CONFIG['database']['connections']['mysql'];
+                        break;
+                }
+            }
+        } else {
+            switch ($_CONFIG['database']['default']) {
+                case 'mysql':
+                    $conConfig = $_CONFIG['database']['connections']['mysql'];
+                    break;
+                case 'mariadb':
+                    $conConfig = $_CONFIG['database']['connections']['mariadb'];
+                    break;
+                default:
+                    $conConfig = $_CONFIG['database']['connections']['mysql'];
+                    break;
+            }
+        }
+        return $conConfig;
     }
 
     // Exposes a static method for easy invocation outside of an object

@@ -18,7 +18,7 @@
 return [
     'appName' => 'Framwork',
     'displayErrors' => true,
-    'isUseEnv' => true,
+    'isUseEnv' => false,
     'isConfigTimeZone' => false,
     'defaultTimeZone' => 'PRC',
     'isCacheConfig' => false,
