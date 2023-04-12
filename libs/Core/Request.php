@@ -62,4 +62,17 @@ class Request
         $jsonData = json_decode($rawData);
         return $jsonData;
     }
+
+    public function post(string $key = '')
+    {
+        $postData = $this->params;
+        if (!empty($key)) {
+            if (array_key_exists($key, $postData)) {
+                return $postData[$key];
+            } else {
+                return null;
+            }
+        }
+        return $postData;
+    }
 }

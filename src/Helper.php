@@ -6,8 +6,18 @@
  * --------------------------------------------------------------------------------
  */
 if (!function_exists('dd')) {
-    function dd(...$vars)
+    function dd()
     {
+        $args = func_get_args();
+        call_user_func_array('var_dump', $args);
+        die(1);
+    }
+}
+
+if (!function_exists('dump')) {
+    function dump(...$vars)
+    {
+
         ob_start();
         var_dump(...$vars);
 
@@ -25,15 +35,6 @@ if (!function_exists('dd')) {
         }
 
         echo $output;
-        die(1);
-    }
-}
-
-if (!function_exists('dump')) {
-    function dump()
-    {
-        $args = func_get_args();
-        call_user_func_array('var_dump', $args);
     }
 }
 

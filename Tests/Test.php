@@ -1,6 +1,6 @@
 <?php
 
-namespace app\Tests;
+namespace Tests;
 
 class Test
 {

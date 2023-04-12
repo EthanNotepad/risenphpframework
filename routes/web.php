@@ -10,8 +10,5 @@ Router::get('/', 'app\Controller\Index@index');
 Router::get('/hello', 'app\Controller\Index@hello');
 Router::get('/hello/:all', 'app\Controller\Index@hello');
 
-// Api Homepage
-Router::any('/api', 'app\Controller\Api\Index@index', \app\Middleware\ExampleMiddleware::class);
-
 // For Testing Functions
-Router::any('/tests', 'app\Tests\Test@index');
+Router::any('/tests', 'Tests\Test@index');
