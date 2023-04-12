@@ -54,7 +54,7 @@ class load
             // 请修复: 路由缓存后，回调函数变成了对象，目前临时解决方案是将对象转换成预设的字符串
             foreach ($staticVars['callbacks'] as $key => $value) {
                 if (is_object($value)) {
-                    $staticVars['callbacks'][$key] = 'app\Controller\ApiController@index';
+                    $staticVars['callbacks'][$key] = 'app\Controller\Index@index';
                 }
             }
             file_put_contents($cacheRoutesConfig, json_encode($staticVars));

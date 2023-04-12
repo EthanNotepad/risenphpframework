@@ -13,9 +13,9 @@ class Test
         /**
          * Test the request function
          */
-        if (0) {
+        if (1) {
             $data = (new \libs\Core\Request)->getPath();
-            dump($data);
+            dd($data);
         }
 
         /**

@@ -6,10 +6,25 @@
  * --------------------------------------------------------------------------------
  */
 if (!function_exists('dd')) {
-    function dd()
+    function dd(...$vars)
     {
-        $args = func_get_args();
-        call_user_func_array('var_dump', $args);
+        ob_start();
+        var_dump(...$vars);
+
+        $output = ob_get_clean();
+        $output = preg_replace('/\]\=\>\n(\s+)/m', '] => ', $output);
+
+
+        if (PHP_SAPI == 'cli') {
+            $output = PHP_EOL . $output . PHP_EOL;
+        } else {
+            if (!extension_loaded('xdebug')) {
+                $output = htmlspecialchars($output, ENT_SUBSTITUTE);
+            }
+            $output = '<pre>' . $output . '</pre>';
+        }
+
+        echo $output;
         die(1);
     }
 }

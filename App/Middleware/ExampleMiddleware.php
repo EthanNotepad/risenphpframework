@@ -8,6 +8,6 @@ class ExampleMiddleware implements MiddlewareInterface
 {
     public function handle()
     {
-        echo 'middleware';
+        echo "passed middleware\n";
     }
 }
