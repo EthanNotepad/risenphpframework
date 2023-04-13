@@ -132,10 +132,10 @@ class Test
             $whereSql[] = array('logs.id', '=', $id);
             $getOne = \libs\Db\DB::link()->table('logs')->where('id', '=', 59)->field('id', 'user_id')->getOne();
             // dd($getOne);
-            $getAll = \libs\Db\DB::link()->table('logs')->where('id', '=', 1)->field('id', 'user_id')->limit(1, 100)->order("id ASC")->get();
+            $getAll = \libs\Db\DB::link()->table('logs')->where('id', '=', 1)->field('id', 'user_id')->limit(1, 100)->order("id ASC")->getAll();
             $getCount = \libs\Db\DB::link()->table('logs')->where('id', '=', 3)->field('id')->count();
-            $getLeftJoin = \libs\Db\DB::link()->table('logs')->where($whereSql)->join('logs AS logs2', 'logs2.user_id = logs.id')->get();
-            $getFieldNotSafe = \libs\Db\DB::link()->table('logs')->where($whereSql)->join('logs AS logs2', 'logs2.user_id = logs.id')->fieldString('logs.id')->get();
+            $getLeftJoin = \libs\Db\DB::link()->table('logs')->where($whereSql)->join('logs AS logs2', 'logs2.user_id = logs.id')->select();
+            $getFieldNotSafe = \libs\Db\DB::link()->table('logs')->where($whereSql)->join('logs AS logs2', 'logs2.user_id = logs.id')->fieldString('logs.id')->select();
             // $getSqlDd = \libs\Db\DB::link()->table('logs')->where('id', '=', 1)->field('id', 'user_id')->limit(1, 100)->order("id ASC")->dd('get');
 
             // Data insertion and getting the inserted id

@@ -184,7 +184,7 @@ class DB implements CoreDB
         return self::$db_instance;
     }
 
-    public function get()
+    public function select()
     {
         if (empty($this->table)) {
             Message::send(10400);
@@ -193,13 +193,28 @@ class DB implements CoreDB
         return $this->query($sql);
     }
 
-    public function getOne()
+    public function getAll()
+    {
+        return $this->select();
+    }
+
+    public function get()
     {
         if (empty($this->table)) {
             Message::send(10400);
         }
         $sql = $this->getSql();
         return $this->queryOne($sql);
+    }
+
+    public function first()
+    {
+        return $this->get();
+    }
+
+    public function getOne()
+    {
+        return $this->get();
     }
 
     public function insert(array $vars)

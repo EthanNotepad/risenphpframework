@@ -42,7 +42,7 @@ class Validator extends ValidateRules
                     Message::send(412, [], "Invalid validation rule: $rule");
                 }
 
-                if (!$this->$method($value, $params)) {
+                if (!$this->$method($value, $params, $this->data)) {
                     $message = isset($this->messages["$field.$rule"]) ? $this->messages["$field.$rule"] : "The $field field is invalid.";
                     $errors[$field] = $message;
 
@@ -58,5 +58,6 @@ class Validator extends ValidateRules
     public function setFields(array $value)
     {
         $this->fields = $value;
+        return $this;
     }
 }
