@@ -28,9 +28,19 @@ class App
 
     public static function init()
     {
+        self::appFiles();
         self::appEnv();
         self::appTimeZone();
         self::appDisplayErrors();
+    }
+
+    public static function appFiles()
+    {
+        $baseDir = PROJECT_ROOT_PATH . '/bootstrap/App';
+        $pattern = $baseDir . '/*.php';
+        foreach (glob($pattern) as $file) {
+            require_once $file;
+        }
     }
 
     public static function appEnv()

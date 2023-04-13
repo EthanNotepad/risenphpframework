@@ -28,4 +28,58 @@ class UploadFiles
             }
         }
     }
+
+    /**
+     * read the list of files in the specified directory
+     * supports filtering according to the file format
+     */
+    public function filesList($path, $format = '')
+    {
+        $files = scandir($path);
+        $filteredFiles = array();
+
+        foreach ($files as $file) {
+            if ($file !== '.' && $file !== '..') {
+                $filePath = $path . '/' . $file;
+                if (is_file($filePath)) {
+                    if ($format !== '' && pathinfo($filePath, PATHINFO_EXTENSION) !== $format) {
+                        continue;
+                    }
+                    $filteredFiles[] = $filePath;
+                }
+            }
+        }
+
+        return $filteredFiles;
+    }
+
+    /**
+     * Receive the file and store it in the specified directory
+     */
+    public function saveFile($file, $path)
+    {
+        $fileName = basename($file['name']);
+        $targetFilePath = $path . '/' . $fileName;
+        if (move_uploaded_file($file['tmp_name'], $targetFilePath)) {
+            return $targetFilePath;
+        } else {
+            return false;
+        }
+    }
+
+    /**
+     * Delete the file
+     */
+    public function deleteFile($filePath)
+    {
+        if (file_exists($filePath)) {
+            if (unlink($filePath)) {
+                return true;
+            } else {
+                return false;
+            }
+        } else {
+            return false;
+        }
+    }
 }

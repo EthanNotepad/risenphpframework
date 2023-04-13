@@ -75,11 +75,23 @@ class Test
          * Test bash64 file upload function
          */
         if (0) {
-            $filePath = __DIR__ . '/imageData.base64';
+            $filePath = PROJECT_ROOT_PATH . '/Tests/imageData.base64';
             $imgData = file_get_contents($filePath);
             $uploader = new \app\Tool\UploadFiles();
             $imagePath = $uploader->uploadFilesBase64($imgData, 'public/upload/images/');
             echo $imagePath;
+        }
+
+        /**
+         * Test the PDF generator function
+         */
+        if (0) {
+            $imagePath = PROJECT_ROOT_PATH . '/Tests/871475.jpeg';
+            $nowDateName = date('Ymd');
+            // open pdf on browser
+            $PDFGenerator = (new \src\PDFGenerator\PDFGenerator())->makePicture($imagePath)->Output('I', 'damage_draw_' . $nowDateName . '.pdf');
+            // download pdf
+            // $PDFGenerator = (new \src\PDFGenerator\PDFGenerator())->makePicture($imagePath)->Output('D', 'damage_draw_' . $nowDateName . '.pdf');
         }
 
         /**
