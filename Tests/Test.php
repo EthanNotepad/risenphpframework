@@ -191,6 +191,13 @@ class Test
             ldap_unbind($ldapconn);
         }
 
+        /**
+         * Test the error handler function
+         */
+        if (0) {
+            echo $nothisvar; // error
+            throw new \Exception('test Exception'); // exception
+        }
         echo '<br>';
         echo '<br>';
         echo '<hr>';

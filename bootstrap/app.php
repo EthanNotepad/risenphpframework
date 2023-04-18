@@ -2,6 +2,7 @@
 
 namespace bootstrap;
 
+use libs\Core\CoreError;
 use libs\Core\Router;
 
 class App
@@ -72,13 +73,7 @@ class App
 
     public static function appDisplayErrors()
     {
-        if (config('displayErrors')) {
-            error_reporting(E_ALL);
-            ini_set('display_errors', 1);
-        } else {
-            error_reporting(0);
-            ini_set('display_errors', 0);
-        }
+        (new CoreError(config('displayErrors')))->bootstrap();
     }
 
     public static function loadConfig()

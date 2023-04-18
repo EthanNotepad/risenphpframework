@@ -18,6 +18,7 @@
 return [
     'appName' => 'Framwork',
     'displayErrors' => true,
+    'defaultErrorMessage' => 'Error, please contact the administrator!',
     'isUseEnv' => false,
     'isConfigTimeZone' => false,
     'defaultTimeZone' => 'PRC',
