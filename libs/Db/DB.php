@@ -184,6 +184,7 @@ class DB implements CoreDB
         return self::$db_instance;
     }
 
+    // FIXME Alias can be more artisan
     public function select()
     {
         if (empty($this->table)) {
@@ -213,6 +214,11 @@ class DB implements CoreDB
     }
 
     public function getOne()
+    {
+        return $this->get();
+    }
+
+    public function find()
     {
         return $this->get();
     }

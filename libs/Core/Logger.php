@@ -2,6 +2,10 @@
 
 namespace libs\Core;
 
+/**
+ * maybe we can delete this class
+ */
+
 use PDOException;
 use libs\Db\DB;
 

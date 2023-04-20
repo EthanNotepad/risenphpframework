@@ -8,6 +8,10 @@ class Validator extends ValidateRules
     private $rules;
     private $messages;
     private $fields;
+    private $alias = [
+        'numeric' => ['number', 'num'],
+        'symbol' => ['specialcharacter'],
+    ];
 
     public function __construct($data, $rules, $messages = [])
     {
@@ -21,13 +25,17 @@ class Validator extends ValidateRules
         $errors = [];
 
         foreach ($this->rules as $field => $rules) {
-
-            // Only validate the field if it has been set
-            if (!empty($this->fields) && !in_array($field, $this->fields)) {
-                continue;
-            }
-
             foreach ($rules as $rule) {
+                // If a field rule is set, but there is no data to be validated for this field, then skip
+                if (!isset($this->data[$field])) {
+                    continue;
+                }
+
+                // Only validate the field if it has been set
+                if (!empty($this->fields) && !in_array($field, $this->fields)) {
+                    continue;
+                }
+
                 $value = $this->data[$field];
                 $params = null;
 
@@ -39,7 +47,19 @@ class Validator extends ValidateRules
                 $method = 'validate_' . $rule;
 
                 if (!method_exists($this, $method)) {
-                    Message::send(412, [], "Invalid validation rule: $rule");
+                    // Add an alias system, if the verification rule cannot be found, 
+                    // the alias will be searched, and if it exists, the defined rule will be used
+                    $alias_matched = false;
+                    foreach ($this->alias as $alias_key => $alias_array) {
+                        if (in_array($rule, $alias_array)) {
+                            $method = 'validate_' . $alias_key;
+                            $alias_matched = true;
+                            break;
+                        }
+                    }
+                    if (!$alias_matched) {
+                        Message::send(412, [], "Invalid validation rule: $rule");
+                    }
                 }
 
                 if (!$this->$method($value, $params, $this->data)) {

@@ -56,9 +56,13 @@ class UploadFiles
     /**
      * Receive the file and store it in the specified directory
      */
-    public function saveFile($file, $path)
+    public function saveFile($file, $path, $fileName = '')
     {
-        $fileName = basename($file['name']);
+        if (empty($fileName)) {
+            $fileName = basename($file['name']);
+        } else {
+            $fileName = $fileName . '.' . pathinfo($file['name'], PATHINFO_EXTENSION);
+        }
         $targetFilePath = $path . '/' . $fileName;
         if (move_uploaded_file($file['tmp_name'], $targetFilePath)) {
             return $targetFilePath;
@@ -66,6 +70,38 @@ class UploadFiles
             return false;
         }
     }
+
+    /**
+     * Copy the file to the specified directory
+     */
+    public function copyFile($localFilePath, $targetFilePath, $isDelLocaFile = false, $isOverWrite = true)
+    {
+        if (!file_exists($localFilePath)) {
+            return false;
+        }
+
+        if (file_exists($targetFilePath) && !$isOverWrite) {
+            $extension = pathinfo($targetFilePath, PATHINFO_EXTENSION);
+            $newTargetFilePath = pathinfo($targetFilePath, PATHINFO_DIRNAME) . '/' . pathinfo($targetFilePath, PATHINFO_FILENAME) . '_' . uniqid() . '.' . $extension;
+
+            if (!rename($targetFilePath, $newTargetFilePath)) {
+                return false;
+            }
+        }
+
+        if (!copy($localFilePath, $targetFilePath)) {
+            return false;
+        }
+
+        if ($isDelLocaFile) {
+            if (!unlink($localFilePath)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
 
     /**
      * Delete the file
