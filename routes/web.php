@@ -6,9 +6,9 @@ use libs\Core\Router;
 Router::haltOnMatch();
 
 // homepage
-Router::get('/', 'app\Controller\Index@index');
-Router::get('/hello', 'app\Controller\Index@hello');
-Router::get('/hello/:all', 'app\Controller\Index@hello');
+Router::get('/', 'app\Controller\IndexController@index');
+Router::get('/hello', 'app\Controller\IndexController@hello');
+Router::get('/hello/:all', 'app\Controller\IndexController@hello');
 
 // For Testing Functions
 Router::any('/tests', 'Tests\Test@index');

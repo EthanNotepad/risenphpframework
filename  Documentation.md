@@ -12,9 +12,9 @@ Once everything is ready, visit the site directory to get started.
 
 ### The Root Directory
 
-#### The App Directory
+#### The app Directory
 
-The `App` directory contains the core code of application.
+The `app ` directory contains the core code of application.
 
 Almost all of the classes will be in this directory.
 

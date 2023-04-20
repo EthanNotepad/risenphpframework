@@ -4,7 +4,7 @@ namespace app\Controller\Api;
 
 use app\Foundations\CoreController;
 
-class Index extends CoreController
+class ApiIndexController extends CoreController
 {
     public function index()
     {

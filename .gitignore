@@ -3,4 +3,4 @@
 /.env
 /runtime/cache/*
 /logs/*
-/public/upload/images/*
+/public/uploads/profile_photo/*

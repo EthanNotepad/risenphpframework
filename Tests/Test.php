@@ -19,7 +19,7 @@ class Test
         }
 
         /**
-         * Test the Response function
+         * Test the response function
          */
         if (0) {
             $response = new \libs\Core\Response('Hello, world!', 404, [
@@ -174,30 +174,32 @@ class Test
             echo $redis->get('mykey');
         }
 
-        /**
-         * Test the LDAP function
-         */
-        if (0) {
-            $ldapconn = ldap_connect("ldap://ldap.wqzbxh.site");
-            // 绑定到LDAP服务器
-            // ldap_bind($ldapconn, "cn=wqzbxh,dc=ldap.wqzbxh,dc=site", "admin123");
-            // 搜索LDAP目录
-            $search_results = ldap_search($ldapconn, "dc=ldap.wqzbxh,dc=site", "(&(objectClass=person)(uid=14))");
-            // 获取搜索结果
-            $entries = ldap_get_entries($ldapconn, $search_results);
-            // 输出搜索结果
-            var_dump($entries);
-            // 断开LDAP连接
-            ldap_unbind($ldapconn);
-        }
-
-        /**
-         * Test the error handler function
-         */
+        // Test the error handler function
         if (0) {
             echo $nothisvar; // error
             throw new \Exception('test Exception'); // exception
         }
+
+        // Test the image generator function
+        if (0) {
+            $test = new \app\Tool\ImageGenerator;
+            $path = $test->createRandProfilePhoto(PROJECT_ROOT_PATH . '/public/uploads/profile_photo/');
+            echo 'generate image success, path is: ' . $path;
+        }
+
+        if (0) {
+            $test = new \app\Tool\FileHandler;
+            $result = $test->copyFile(PROJECT_ROOT_PATH . '/public/uploads/new.png', PROJECT_ROOT_PATH . '/public/uploads/profile_photo/back1.png', true);
+            if ($result) {
+                echo 'copy file success';
+            }
+
+            $result = $test->deleteFile(PROJECT_ROOT_PATH . '/public/uploads/profile_photo/4379686249.png');
+            if ($result) {
+                echo 'delete file success';
+            }
+        }
+
         echo '<br>';
         echo '<br>';
         echo '<hr>';
