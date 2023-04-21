@@ -7,6 +7,7 @@
 - Add many tools
 - Optimize many codes
 - Fixed many bugs
+- Add SMTP Emali Function
 
 ## 0.3.0 - 2023.04.07
 

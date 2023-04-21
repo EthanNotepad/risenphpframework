@@ -188,6 +188,22 @@ class Test
         }
 
         if (0) {
+            $to_user = ['svip2011@qq.com'];
+            $title = "Rental Agreement Project";
+            $content = "<h1>Test email</h1>
+            <p>Test email</p>";
+            $sendmail_model = new \src\phpmailer\REmail;
+            $sendmail_model->setAttachment(PROJECT_ROOT_PATH . 'Tests/871475.jpeg', '871475.jpeg');
+            $return = $sendmail_model->send($to_user, $title, $content);
+            if ($return === true) {
+                echo "Email send success";
+            } else {
+                echo "Email send failed, error: " . $return;
+            }
+        }
+
+        // Test the file handler function
+        if (0) {
             $test = new \app\Tool\FileHandler;
             $result = $test->copyFile(PROJECT_ROOT_PATH . '/public/uploads/new.png', PROJECT_ROOT_PATH . '/public/uploads/profile_photo/back1.png', true);
             if ($result) {
