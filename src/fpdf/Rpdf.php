@@ -1,10 +1,10 @@
 <?php
 
-namespace src\PDFGenerator;
+namespace src\fpdf;
 
-use src\PDFGenerator\fpdf\FPDF;
+use src\fpdf\Core\FPDF;
 
-class PDFGenerator extends FPDF
+class Rpdf extends FPDF
 {
     public function _construct($orientation = 'P', $unit = 'mm', $format = 'A4', $margin = 20)
     {

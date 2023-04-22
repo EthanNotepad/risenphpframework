@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.4.1 - 2023.04.22
+
+- Change the src directory to an extended directory and move out of autoload.php
+  (In order to separate the plug-in part in the future)
+- Added: src/rjwt (JWT class) not finished!
+
 ## 0.4.0 - 2023.04.21
 
 - Upgraded CoreRouter class (support middle)

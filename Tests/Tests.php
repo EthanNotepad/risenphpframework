@@ -2,7 +2,7 @@
 
 namespace Tests;
 
-class Test
+class Tests
 {
     /**
      * It can be used for testing,
@@ -83,18 +83,6 @@ class Test
         }
 
         /**
-         * Test the PDF generator function
-         */
-        if (0) {
-            $imagePath = PROJECT_ROOT_PATH . '/Tests/871475.jpeg';
-            $nowDateName = date('Ymd');
-            // open pdf on browser
-            $PDFGenerator = (new \src\PDFGenerator\PDFGenerator())->makePicture($imagePath)->Output('I', 'damage_draw_' . $nowDateName . '.pdf');
-            // download pdf
-            // $PDFGenerator = (new \src\PDFGenerator\PDFGenerator())->makePicture($imagePath)->Output('D', 'damage_draw_' . $nowDateName . '.pdf');
-        }
-
-        /**
          * Test log database table functionality
          */
         if (0) {
@@ -160,16 +148,8 @@ class Test
          * Test the Redis function
          */
         if (0) {
+            // $redis = \libs\Factory\NosqlFactory::factory('redis'); // NoSql factory function
             $redis = \libs\Db\RedisDB::link();
-            $redis->set('mykey', 'shejibiji.com');
-            echo $redis->get('mykey');
-        }
-
-        /**
-         * Test the NoSql factory function
-         */
-        if (0) {
-            $redis = \libs\Factory\NosqlFactory::factory('redis');
             $redis->set('mykey', 'shejibiji.com');
             echo $redis->get('mykey');
         }
@@ -185,21 +165,6 @@ class Test
             $test = new \app\Tool\ImageGenerator;
             $path = $test->createRandProfilePhoto(PROJECT_ROOT_PATH . '/public/uploads/profile_photo/');
             echo 'generate image success, path is: ' . $path;
-        }
-
-        if (0) {
-            $to_user = ['svip2011@qq.com'];
-            $title = "Rental Agreement Project";
-            $content = "<h1>Test email</h1>
-            <p>Test email</p>";
-            $sendmail_model = new \src\phpmailer\REmail;
-            $sendmail_model->setAttachment(PROJECT_ROOT_PATH . 'Tests/871475.jpeg', '871475.jpeg');
-            $return = $sendmail_model->send($to_user, $title, $content);
-            if ($return === true) {
-                echo "Email send success";
-            } else {
-                echo "Email send failed, error: " . $return;
-            }
         }
 
         // Test the file handler function
