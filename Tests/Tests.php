@@ -181,6 +181,11 @@ class Tests
             }
         }
 
+        // Test the env helper function
+        if (0) {
+            dd(getenv(), env('APP_NAME', 'Risen'));
+        }
+
         echo '<br>';
         echo '<br>';
         echo '<hr>';

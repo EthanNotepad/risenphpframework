@@ -16,10 +16,9 @@
  */
 
 return [
-    'appName' => 'Framework',
     'displayErrors' => true,
     'defaultErrorMessage' => 'Error, please contact the administrator!',
-    'isUseEnv' => false,
+    'isUseEnv' => true,
     'isConfigTimeZone' => false,
     'defaultTimeZone' => 'PRC',
     'isCacheConfig' => false,

@@ -67,6 +67,22 @@ if (!function_exists('config')) {
 
 /**
  * --------------------------------------------------------------------------------
+ * Read the defined array data in the config folder
+ * --------------------------------------------------------------------------------
+ */
+if (!function_exists('env')) {
+    function env($key, $default_val = null)
+    {
+        $result = getenv($key);
+        if ($result === false) {
+            $result = $default_val;
+        }
+        return $result;
+    }
+}
+
+/**
+ * --------------------------------------------------------------------------------
  * generate a unique number
  * --------------------------------------------------------------------------------
  */

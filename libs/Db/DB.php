@@ -50,38 +50,18 @@ class DB implements CoreDB
         global $_CONFIG;
         if ($_CONFIG['app']['isUseEnv']) {
             $conConfig = [
-                'host' => getenv('HOSTNAME'),
-                'port' => getenv('HOSTPORT'),
-                'username' => getenv('USERNAME'),
-                'password' => getenv('PASSWORD'),
-                'dbname' => getenv('DATABASE'),
-                'dbcharset' => getenv('CHARSET'),
+                'host' => env('HOSTNAME', ''),
+                'port' => env('HOSTPORT'),
+                'username' => env('USERNAME'),
+                'password' => env('PASSWORD'),
+                'dbname' => env('DATABASE'),
+                'dbcharset' => env('CHARSET'),
             ];
             if (empty($conConfig['host'])) {
-                switch ($_CONFIG['database']['default']) {
-                    case 'mysql':
-                        $conConfig = $_CONFIG['database']['connections']['mysql'];
-                        break;
-                    case 'mariadb':
-                        $conConfig = $_CONFIG['database']['connections']['mariadb'];
-                        break;
-                    default:
-                        $conConfig = $_CONFIG['database']['connections']['mysql'];
-                        break;
-                }
+                $conConfig = $_CONFIG['database']['connections'][$_CONFIG['database']['default']];
             }
         } else {
-            switch ($_CONFIG['database']['default']) {
-                case 'mysql':
-                    $conConfig = $_CONFIG['database']['connections']['mysql'];
-                    break;
-                case 'mariadb':
-                    $conConfig = $_CONFIG['database']['connections']['mariadb'];
-                    break;
-                default:
-                    $conConfig = $_CONFIG['database']['connections']['mysql'];
-                    break;
-            }
+            $conConfig = $_CONFIG['database']['connections'][$_CONFIG['database']['default']];
         }
         return $conConfig;
     }

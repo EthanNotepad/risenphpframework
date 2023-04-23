@@ -13,6 +13,11 @@ class RedisDB implements CoreDB
 
     private function __construct()
     {
+        // if (config('isUseEnv')) {
+        //     $this->initByEnv();
+        // } else {
+        //     $this->initByConfig();
+        // }
         global $_CONFIG;
         self::$dbConfig = $_CONFIG['database']['redis']['default'];
         self::$redis = new Redis();
@@ -24,6 +29,16 @@ class RedisDB implements CoreDB
             echo 'Error: ' . $e->getMessage();
             exit();
         }
+    }
+
+    private function initByEnv()
+    {
+        self::$dbConfig = [
+            'host' => env('REDIS_HOST', ''),
+            'port' => env('REDIS_PORT'),
+            'password' => env('REDIS_PASSWORD'),
+            'dbindex' => env('REDIS_DBINDEX'),
+        ];
     }
 
     public static function link()
