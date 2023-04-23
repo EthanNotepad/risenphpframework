@@ -16,7 +16,7 @@
  */
 
 return [
-    'appName' => 'Framwork',
+    'appName' => 'Framework',
     'displayErrors' => true,
     'defaultErrorMessage' => 'Error, please contact the administrator!',
     'isUseEnv' => false,

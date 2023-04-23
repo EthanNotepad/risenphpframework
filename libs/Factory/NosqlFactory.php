@@ -6,6 +6,7 @@ class NosqlFactory
 {
     public static function factory($className)
     {
+        $className = strtolower($className);
         switch ($className) {
             case 'redis':
                 $className = 'RedisDB';
