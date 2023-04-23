@@ -18,22 +18,7 @@ class RJWT
     // private static $allowed_alg = [self::ALG_HS256, self::ALG_HS384, self::ALG_HS512, self::ALG_RS256, self::ALG_RS384, self::ALG_RS512, self::ALG_ES256, self::ALG_ES384, self::ALG_ES512];
 
     private static $allowed_alg = [self::ALG_HS256, self::ALG_HS384, self::ALG_HS512];
-
-    private static $default_alg = self::ALG_HS256;  // hash_hmac_algos(): array can get list
     private static $blacklist = [];  // check if the given JWT ID has been blacklisted (revoked
-    private static $secret_key = "example_key";
-    private static $refresh_key = "example_refresh_key";
-
-    /**
-     * @Description set default alg
-     * @DateTime 2023-04-23
-     * @param string $algname
-     * @return void
-     */
-    public static function setAlg(string $algname): void
-    {
-        self::$default_alg = $algname;
-    }
 
     /**
      * @Description set blacklist
@@ -58,21 +43,30 @@ class RJWT
      * @param int $refreshExpireTime
      * @return void
      */
-    public static function encode(array $data, string $secret_key = '', $exp = 0, $refresh_switch = false, string $refresh_key = '', $refreshExpireTime = 86400)
+    public static function encode(array $data, string $secret_key = '', $exp = 0, $alg = '', $refresh_switch = false, string $refresh_key = '', $refresh_expire_time = '')
     {
-        $header = ['typ' => 'JWT', 'alg' => self::$default_alg];
-        $secret_key = empty($secret_key) ? self::$secret_key : $secret_key;
-        $refresh_key = empty($refresh_key) ? self::$refresh_key : $refresh_key;
-        $expire_time = $exp > 0 ? time() + $exp : time() + 3600; // Default to 1 hour expiry
+        global $_CONFIG;
+        $rjwtConfig = $_CONFIG['src']['rjwt'];
+
+        $default_alg = empty($alg) ? $rjwtConfig['default_alg'] : $alg;
+        $secret_key = empty($secret_key) ? $rjwtConfig['secret_key'] : $secret_key;
+        $expire_time = $exp > 0 ? time() + $exp : time() + $rjwtConfig['expire_time']; // Default to 1 hour expiry
+
+        $header = ['typ' => 'JWT', 'alg' => $default_alg];
         $payload = [
             "jti" => uniqid(),
             "iat" => time(),
             "exp" => $expire_time,
             "data" => $data
         ];
-        $jwt = self::sign(self::$default_alg, $header, $payload, $secret_key);
+        $jwt = self::sign($default_alg, $header, $payload, $secret_key);
+
+        $refresh_switch = $refresh_switch === false ? $rjwtConfig['refresh_switch'] : $refresh_switch;
         if ($refresh_switch) {
-            $refreshToken = self::generateRefreshToken(self::$default_alg, $header, $payload, $refresh_key, $refreshExpireTime);
+            $refresh_expire_time = empty($refresh_expire_time) ? $rjwtConfig['refresh_expire_time'] : $refresh_expire_time;
+            $refresh_key = empty($refresh_key) ? $rjwtConfig['refresh_key'] : $refresh_key;
+
+            $refreshToken = self::generateRefreshToken($default_alg, $header, $payload, $refresh_key, $refresh_expire_time);
             $returnData = [
                 "access_token" => $jwt,
                 "refresh_token" => $refreshToken,
@@ -95,6 +89,9 @@ class RJWT
      */
     public static function decode(string $token, string $key = '', string $alg = ''): array | object
     {
+        global $_CONFIG;
+        $rjwtConfig = $_CONFIG['src']['rjwt'];
+
         $parts = explode('.', $token);
         if (count($parts) !== 3) {
             throw new \Exception('Invalid token format');
@@ -110,8 +107,8 @@ class RJWT
             throw new \Exception('Invalid token payload');
         }
 
-        $alg = empty($alg) ? self::$default_alg : $alg;
-        $key = empty($key) ? self::$secret_key : $key;
+        $alg = empty($alg) ? $rjwtConfig['default_alg'] : $alg;
+        $key = empty($key) ? $rjwtConfig['secret_key'] : $key;
         if (!self::verifySignature($token, $key, $alg)) {
             throw new \Exception('Invalid token signature');
         }
@@ -130,8 +127,10 @@ class RJWT
     public static function verifyToken(string $token, string $key = '', string $alg = ''): array | bool
     {
         // Verify the access token and return the payload
-        $alg = empty($alg) ? self::$default_alg : $alg;
-        $key = empty($key) ? self::$secret_key : $key;
+        global $_CONFIG;
+        $rjwtConfig = $_CONFIG['src']['rjwt'];
+        $alg = empty($alg) ? $rjwtConfig['default_alg'] : $alg;
+        $key = empty($key) ? $rjwtConfig['secret_key'] : $key;
         $payload = self::verify($token, $key, $alg);
         return $payload;
     }
@@ -148,8 +147,10 @@ class RJWT
     public static function verifyRefreshToken(string $token, string $refresh_key = '', string $alg = ''): array | bool
     {
         // Verify the access token and return the payload
-        $alg = empty($alg) ? self::$default_alg : $alg;
-        $refresh_key = empty($key) ? self::$refresh_key : $refresh_key;
+        global $_CONFIG;
+        $rjwtConfig = $_CONFIG['src']['rjwt'];
+        $alg = empty($alg) ? $rjwtConfig['default_alg'] : $alg;
+        $refresh_key = empty($refresh_key) ? $rjwtConfig['refresh_key'] : $refresh_key;
         $payload = self::verify($token, $refresh_key, $alg);
         return $payload;
     }
@@ -187,7 +188,6 @@ class RJWT
         $base64UrlHeader = self::base64UrlEncode($header);
         $base64UrlPayload = self::base64UrlEncode($payload);
 
-        $alg = empty($alg) ? self::$default_alg : $alg;
         switch ($alg) {
             case self::ALG_HS256:
                 $hash = 'sha256';
@@ -209,7 +209,9 @@ class RJWT
 
     private static function is_blacklisted($jti)
     {
-        return in_array($jti, self::$blacklist);
+        global $_CONFIG;
+        $blacklist = empty(self::$blacklist) ? $_CONFIG['src']['rjwt']['blacklist'] : self::$blacklist;
+        return in_array($jti, $blacklist);
     }
 
     // Token encryption
