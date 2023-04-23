@@ -11,8 +11,8 @@ class REmail
         try {
             // read config
             global $_CONFIG;
-            $defaultConfig = $_CONFIG['email']['default'];
-            $conConfig = $_CONFIG['email'][$defaultConfig];
+            $defaultConfig = $_CONFIG['src']['email']['driver'];
+            $conConfig = $_CONFIG['src']['email'][$defaultConfig];
 
             // new phpmailer
             $mail = new \src\phpmailer\Core\PHPMailer(true);

@@ -4,7 +4,8 @@
  * ------------------------------------------------------------
  * How to use, you can refer to the following test
  * ------------------------------------------------------------
- * 1.Config email config file: config\email.php
+ * 1.Release the email related configuration in the configuration file config\src.php,
+ *  and configure the email server information
  * 2.Add route:
  *  Router::any('/src/email/test', 'src\phpmailer\Test@test');
  * 3. Access URI: 
