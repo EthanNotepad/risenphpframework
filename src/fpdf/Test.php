@@ -4,7 +4,7 @@
  * ------------------------------------------------------------
  * How to use, you can refer to the following test
  * ------------------------------------------------------------
- * 1.Add route:
+ * 1. Add route:
  *  Router::any('/src/pdf/test', 'src\fpdf\Test@test');
  * 2. Access URI: 
  *  /src/pdf/test

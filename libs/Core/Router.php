@@ -163,7 +163,6 @@ class Router
                     // If route is not an object
                     if (!is_object($routesConfig['callbacks'][$route])) {
 
-
                         // Grab all parts based on a / separator
                         $parts = explode('/', $routesConfig['callbacks'][$route]);
                         // dd($route);
@@ -232,7 +231,7 @@ class Router
 
                             // Fix multi parameters
                             if (!method_exists($controller, $segments[1])) {
-                                echo "controller and action not found";
+                                throw new Exception('controller and action not found.');
                             } else {
                                 call_user_func_array(array($controller, $segments[1]), $matched);
                             }
@@ -257,7 +256,7 @@ class Router
             if (!$routesConfig['error_callback']) {
                 $routesConfig['error_callback'] = function () {
                     header($_SERVER['SERVER_PROTOCOL'] . " 404 Not Found");
-                    Message::send(404, [], 'The requested URL ' . $_SERVER['REQUEST_URI'] . ' was not found on this server.');
+                    throw new Exception('The requested URL ' . $_SERVER['REQUEST_URI'] . ' was not found on this server.');
                 };
             } else {
                 if (is_string($routesConfig['error_callback'])) {

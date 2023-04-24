@@ -1,6 +1,6 @@
 <?php
 
-namespace libs\Core;
+namespace src\tablelogger\Core;
 
 class LogAction
 {

@@ -20,6 +20,6 @@ return [
     'defaultErrorMessage' => 'Error, please contact the administrator!',
     'isUseEnv' => true,
     'isConfigTimeZone' => false,
-    'defaultTimeZone' => 'PRC',
+    'defaultTimeZone' => env('DEFAULT_TIMEZONE', 'PRC'),
     'isCacheConfig' => false,
 ];

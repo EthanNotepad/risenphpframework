@@ -8,6 +8,7 @@
 - Changed the cache and log directories, they are now placed in the storage directory
 - Added: env helper function, if the env configuration is enabled, the environment configuration will be read first
 - upgrade: core db class
+- Modify the catch output of Exception and remove the message module
 
 ## 0.4.0 - 2023.04.21
 

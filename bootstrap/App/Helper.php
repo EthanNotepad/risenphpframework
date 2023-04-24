@@ -71,13 +71,38 @@ if (!function_exists('config')) {
  * --------------------------------------------------------------------------------
  */
 if (!function_exists('env')) {
-    function env($key, $default_val = null)
+    function env($key, $default = null)
     {
-        $result = getenv($key);
-        if ($result === false) {
-            $result = $default_val;
+        $value = getenv($key);
+
+        if ($value === false) {
+            return value($default);
         }
-        return $result;
+
+        switch (strtolower($value)) {
+            case 'true':
+            case '(true)':
+                return true;
+            case 'false':
+            case '(false)':
+                return false;
+            case 'empty':
+            case '(empty)':
+                return '';
+            case 'null':
+            case '(null)':
+                return null;
+        }
+
+        return $value;
+    }
+}
+
+// Return the default value of the given value.
+if (!function_exists('value')) {
+    function value($value, ...$args)
+    {
+        return $value instanceof Closure ? $value(...$args) : $value;
     }
 }
 

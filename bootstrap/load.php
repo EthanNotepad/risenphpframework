@@ -51,12 +51,12 @@ class load
                 return $reflectionProperty->isPublic() && $reflectionProperty->isStatic();
             }, ARRAY_FILTER_USE_KEY);
             // FIXME After the route is cached, the callback function becomes an object
-            // 请修复: 路由缓存后，回调函数变成了对象，目前临时解决方案是将对象转换成预设的字符串
-            // foreach ($staticVars['callbacks'] as $key => $value) {
-            //     if (is_object($value)) {
-            //         $staticVars['callbacks'][$key] = 'app\Controller\Index@index';
-            //     }
-            // }
+            // 请修复: 路由缓存后，回调函数变成了对象，缓存文件里面内容变成了空数组，目前临时解决方案是直接报错
+            foreach ($staticVars['callbacks'] as $key => $value) {
+                if (is_object($value)) {
+                    throw new \Exception('After the routing cache is enabled, the closure function is not supported for the this framework version');
+                }
+            }
             file_put_contents($cacheRoutesConfig, json_encode($staticVars));
             return $staticVars;
         }

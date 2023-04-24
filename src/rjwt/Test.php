@@ -4,10 +4,10 @@
  * ------------------------------------------------------------
  * How to use, you can refer to the following test
  * ------------------------------------------------------------
- * 1.Configure extended information.
+ * 1. Configure extended information.
  *  You can copy the contents of the src.example.php file in this directory to config/src.php
  *  Then modify the information in the configuration file to the actual information.
- * 2.Add route:
+ * 2. Add route:
  *  Router::any('/src/rjwt/test/encode', 'src\rjwt\Test@encode');
  *  Router::any('/src/rjwt/test/decode', 'src\rjwt\Test@decode');
  * 3. Access URI: 

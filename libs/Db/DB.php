@@ -2,9 +2,9 @@
 
 namespace libs\Db;
 
+use Exception;
 use PDO;
 use PDOException;
-use libs\Core\Message;
 
 class DB implements DbInterface
 {
@@ -40,7 +40,7 @@ class DB implements DbInterface
             $this->db->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
             $this->db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         } catch (PDOException $e) {
-            Message::send(412, [], "Exception: " . $e->getMessage());
+            throw new Exception("Exception: " . $e->getMessage());
         }
     }
 
@@ -65,30 +65,6 @@ class DB implements DbInterface
             self::$db_instance = new self;
         }
         return self::$db_instance;
-    }
-
-    public function query(string $sql, array $vars = [])
-    {
-        $stn = self::link()->db->prepare($sql);
-        $stn->execute($vars);
-        $row = $stn->fetchAll();
-        $this->free();
-        return $row;
-    }
-
-    public function queryOne(string $sql, array $vars = [])
-    {
-        $stn = self::link()->db->prepare($sql);
-        $stn->execute($vars);
-        $row = $stn->fetch();
-        $this->free();
-        return $row;
-    }
-
-    public function execute(string $sql, array $vars = [])
-    {
-        $stn = self::link()->db->prepare($sql);
-        return $stn->execute($vars)->rowCount();
     }
 
     public function table(string $table)
@@ -179,12 +155,10 @@ class DB implements DbInterface
         return self::$db_instance;
     }
 
-    // FIXME Alias can be more artisan
-    // fetch all part
     public function select()
     {
         if (empty($this->table)) {
-            Message::send(10400);
+            throw new Exception("Model error, missing table name.");
         }
         $sql = $this->getSql();
         return $this->query($sql);
@@ -195,11 +169,10 @@ class DB implements DbInterface
         return $this->select();
     }
 
-    // fetch one part
     public function get()
     {
         if (empty($this->table)) {
-            Message::send(10400);
+            throw new Exception("Model error, missing table name.");
         }
         $sql = $this->getSql();
         return $this->queryOne($sql);
@@ -219,47 +192,11 @@ class DB implements DbInterface
     {
         return $this->get();
     }
-    // fetch part end
-
-    public function insert(array $vars)
-    {
-        if (empty($this->table)) {
-            Message::send(10400);
-        }
-        $fields = '`' . implode('`,`', array_keys($vars)) . '`';
-        $values = implode(',', array_fill(0, count($vars), '?'));
-        $sql = "INSERT INTO {$this->table} ($fields) VALUES($values)";
-        return $this->execute($sql, array_values($vars));
-    }
-
-    public function update(array $vars)
-    {
-        if (empty($this->table)) {
-            Message::send(10400);
-        }
-        if (empty($this->where)) {
-            Message::send(10401);
-        }
-        $sql = "UPDATE {$this->table} SET " . implode('=?, ', array_keys($vars)) . "=? {$this->where}";
-        return $this->execute($sql, array_values($vars));
-    }
-
-    public function delete()
-    {
-        if (empty($this->table)) {
-            Message::send(10400);
-        }
-        if (empty($this->where)) {
-            Message::send(10401);
-        }
-        $sql = "DELETE FROM {$this->table} {$this->where}";
-        return $this->execute($sql);
-    }
 
     public function count()
     {
         if (empty($this->table)) {
-            Message::send(10400);
+            throw new Exception("Model error, missing table name.");
         }
         $sql = $this->getSql();
         return count($this->query($sql));
@@ -270,10 +207,77 @@ class DB implements DbInterface
         return self::link()->db->lastInsertId() ?? 0;
     }
 
+    public function getConfig()
+    {
+        return self::$dbConfig;
+    }
+
+    public function insert(array $vars)
+    {
+        if (empty($this->table)) {
+            throw new Exception("Model error, missing table name.");
+        }
+        $fields = '`' . implode('`,`', array_keys($vars)) . '`';
+        $values = implode(',', array_fill(0, count($vars), '?'));
+        $sql = "INSERT INTO {$this->table} ($fields) VALUES($values)";
+        return $this->execute($sql, array_values($vars));
+    }
+
+    public function update(array $vars)
+    {
+        if (empty($this->table)) {
+            throw new Exception("Model error, missing table name.");
+        }
+        if (empty($this->where)) {
+            throw new Exception("Model error, When updating or deleting, where is required.");
+        }
+        $sql = "UPDATE {$this->table} SET " . implode('=?, ', array_keys($vars)) . "=? {$this->where}";
+        return $this->execute($sql, array_values($vars));
+    }
+
+    public function delete()
+    {
+        if (empty($this->table)) {
+            throw new Exception("Model error, missing table name.");
+        }
+        if (empty($this->where)) {
+            throw new Exception("Model error, When updating or deleting, where is required.");
+        }
+        $sql = "DELETE FROM {$this->table} {$this->where}";
+        return $this->execute($sql);
+    }
+
+    public function query(string $sql, array $vars = [])
+    {
+        $stn = self::link()->db->prepare($sql);
+        $stn->execute($vars);
+        $row = $stn->fetchAll();
+        $this->free();
+        return $row;
+    }
+
+    public function queryOne(string $sql, array $vars = [])
+    {
+        $stn = self::link()->db->prepare($sql);
+        $stn->execute($vars);
+        $row = $stn->fetch();
+        $this->free();
+        return $row;
+    }
+
+    public function execute(string $sql, array $vars = [])
+    {
+        $stn = self::link()->db->prepare($sql);
+        $stn->execute($vars);
+        $row = $stn->rowCount(); // return affected rows
+        $this->free();
+        return $row;
+    }
+
     public function getSql()
     {
         if (empty($this->table)) {
-            Message::send(10400);
+            throw new Exception("Model error, missing table name.");
         }
         if (is_array($this->join)) {
             $this->join = implode(' ', $this->join);

@@ -58,7 +58,7 @@ class Validator extends ValidateRules
                         }
                     }
                     if (!$alias_matched) {
-                        Message::send(412, [], "Invalid validation rule: $rule");
+                        throw new \Exception("Invalid validation rule: $rule");
                     }
                 }
 

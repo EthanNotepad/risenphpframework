@@ -2,6 +2,8 @@
 
 namespace tests;
 
+use Exception;
+
 class Tests
 {
     /**
@@ -66,7 +68,7 @@ class Tests
             $validator->setFields(['name', 'age']);
             $resultValidated = $validator->validate();
             if ($resultValidated !== true) {
-                \libs\Core\Message::send(412, $resultValidated, 'Validation failed');
+                throw new Exception("Validation failed: " . $resultValidated);
             }
             echo 'moving on';
         }
@@ -127,9 +129,14 @@ class Tests
             }
         }
 
-        // Test the env helper function
+        // Test the helper function
         if (0) {
-            dd(getenv(), env('APP_NAME', 'Risen'));
+            // dd(getenv(), env('APP_NAME', 'Risen')); // env function
+            // $value = value(function () {
+            //     return 'test';
+            // }, 'test');
+            // // $value = value('value', 'test');
+            // dd($value);
         }
 
         echo '<br>';
@@ -142,52 +149,23 @@ class Tests
     public function db()
     {
         /**
-         * Test log database table functionality
-         */
-        if (0) {
-            $dbname = config('database.mysql.dbname');
-            $ishavelogssql = "SHOW TABLES IN $dbname WHERE Tables_in_$dbname = 'logs'";
-            $result = \libs\Db\DB::link()->query($ishavelogssql);
-            if (count($result)) {
-                \libs\Core\Logger::sensitive(1);
-            } else {
-                // If there is no logs table, a logs table will be created first
-                $sql = "CREATE TABLE `logs` (
-                    `id` int(11) NOT NULL AUTO_INCREMENT,
-                    `user_id` int(11) DEFAULT NULL,
-                    `action` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-                    `request_url` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-                    `status` tinyint(2) DEFAULT NULL COMMENT '1 success, 2 failure',
-                    `description` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-                    `log_type` tinyint(2) DEFAULT NULL COMMENT '1 web, 2 system',
-                    `ip_address` char(15) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-                    `user_agent` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-                    `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
-                    PRIMARY KEY (`id`)
-                  ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
-                \libs\Db\DB::link()->query($sql);
-                \libs\Core\Logger::sensitive(1);
-            }
-            echo 'moving on';
-        }
-
-        /**
          * Test the database query function, support chain operation
          */
-        if (1) {
+        if (0) {
             $id = $_GET['id'] = "1 OR 1=1";     // test sql injection
             $whereSql[] = array('logs.id', $id);
             $whereSql[] = array('logs.user_id', 1);
+            // dd(\libs\Db\DB::link()->getConfig());
             // $where_test = \libs\Db\DB::link()->table('logs')->where($id)->dd(); // where statement have one parameters, note this is a dangerous action because easy to be injected
             // $where_test = \libs\Db\DB::link()->table('logs')->where('id', $id)->dd(); // where statement have two parameters
             // $where_test = \libs\Db\DB::link()->table('logs')->where('id', '=', $id)->dd(); // where statement have three parameters
             // $where_test = \libs\Db\DB::link()->table('logs')->where($whereSql)->dd(); // where statement is an array
             // $getOne = \libs\Db\DB::link('timetracker')->table('logs')->dd();  // support set dbname
-            // $getCount = \libs\Db\DB::link()->table('logs')->where('id', '=', 3)->field('id')->count();
+            $getCount = \libs\Db\DB::link()->table('logs')->where('id', '=', 3)->field('id')->count();
             // $getAll = \libs\Db\DB::link()->table('logs')->where('id', '=', 1)->field('id', 'user_id')->limit(1, 100)->order("id ASC")->getAll();
             // $getLeftJoin = \libs\Db\DB::link()->table('logs')->where($whereSql)->join('logs AS logs2', 'logs2.user_id = logs.id')->select();
-            $getFieldNotSafe = \libs\Db\DB::link()->table('logs')->where($whereSql)->join('logs AS logs2', 'logs2.user_id = logs.id')->fieldString('count(*) AS total')->get();
-            dd($getFieldNotSafe);
+            // $getFieldNotSafe = \libs\Db\DB::link()->table('logs')->where($whereSql)->join('logs AS logs2', 'logs2.user_id = logs.id')->fieldString('count(*) AS total')->get();
+            dd($getCount);
 
             // Data update and insert
             // Data insertion and getting the inserted id

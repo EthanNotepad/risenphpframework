@@ -4,10 +4,10 @@
  * ------------------------------------------------------------
  * How to use, you can refer to the following test
  * ------------------------------------------------------------
- * 1.Configure extended information.
+ * 1. Configure extended information.
  *  You can copy the contents of the src.example.php file in this directory to config/src.php
  *  Then modify the information in the configuration file to the actual information.
- * 2.Add route:
+ * 2. Add route:
  *  Router::any('/src/email/test', 'src\phpmailer\Test@test');
  * 3. Access URI: 
  *  /src/email/test

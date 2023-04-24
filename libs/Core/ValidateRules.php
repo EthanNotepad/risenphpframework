@@ -15,7 +15,7 @@ class ValidateRules
             return true;
         }
         if (!isset($params[0])) {
-            Message::send(412, [], "Validation rule 'min' requires a parameter.");
+            throw new \Exception("Validation rule 'min' requires a parameter.");
         }
 
         $min = intval($params[0]);
@@ -29,7 +29,7 @@ class ValidateRules
             return true;
         }
         if (!isset($params[0])) {
-            Message::send(412, [], "Validation rule 'max' requires a parameter.");
+            throw new \Exception("Validation rule 'max' requires a parameter.");
         }
 
         $max = intval($params[0]);
@@ -51,7 +51,7 @@ class ValidateRules
             return true;
         }
         if (!isset($params[0])) {
-            Message::send(412, [], "Validation rule 'date' requires a parameter.");
+            throw new \Exception("Validation rule 'date' requires a parameter.");
         }
 
         $format = $params[0];
@@ -130,7 +130,7 @@ class ValidateRules
     protected function validate_same($value, $params, $data)
     {
         if (!isset($params[0])) {
-            Message::send(412, [], "Validation rule 'same' requires a parameter.");
+            throw new \Exception("Validation rule 'same' requires a parameter.");
         }
 
         $other_field = $params[0];
@@ -141,7 +141,7 @@ class ValidateRules
     protected function validate_different($value, $params, $data)
     {
         if (!isset($params[0])) {
-            Message::send(412, [], "Validation rule 'different' requires a parameter.");
+            throw new \Exception("Validation rule 'different' requires a parameter.");
         }
 
         $other_field = $params[0];
@@ -175,7 +175,7 @@ class ValidateRules
             return true;
         }
         if (!isset($params[0])) {
-            Message::send(412, [], "Validation rule 'in' requires a parameter.");
+            throw new \Exception("Validation rule 'in' requires a parameter.");
         }
 
         $allowed_values = $params;
@@ -189,7 +189,7 @@ class ValidateRules
             return true;
         }
         if (!isset($params[0])) {
-            Message::send(412, [], "Validation rule 'not_in' requires a parameter.");
+            throw new \Exception("Validation rule 'not_in' requires a parameter.");
         }
 
         $disallowed_values = $params;
