@@ -1,10 +1,13 @@
 # Changelog
 
-## 0.4.1 - 2023.04.23
+## 0.4.1 - 2023.04.24
 
 - Change the src directory to an extended directory and move out of autoload.php
   (In order to separate the plug-in part in the future)
 - Added: src/rjwt (JWT class)
+- Changed the cache and log directories, they are now placed in the storage directory
+- Added: env helper function, if the env configuration is enabled, the environment configuration will be read first
+- upgrade: core db class
 
 ## 0.4.0 - 2023.04.21
 

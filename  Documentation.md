@@ -46,10 +46,10 @@ The `routes` directory contains all of the route definitions for application.
 
 The `Helper` class is a custom function, if there is a new tool function, please add it here.
 
+#### The tests Directory
+
+The `tests` directory contains all tests classes.
+
 ### The app Directory
-
-#### The Tests Directory
-
-The `Tests` directory contains all tests classes.
 
 // more content

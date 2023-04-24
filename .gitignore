@@ -1,6 +1,6 @@
 .DS_Store
 /.vscode/
 /.env
-/runtime/cache/*
-/logs/*
+/storage/framework/cache/*
+/storage/logs/*
 /public/uploads/profile_photo/*

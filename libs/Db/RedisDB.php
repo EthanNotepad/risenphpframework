@@ -5,47 +5,38 @@ namespace libs\Db;
 use Redis;
 use RedisException;
 
-class RedisDB implements CoreDB
+class RedisDB implements DbInterface
 {
     protected static $dbConfig;
-
-    private static $redis;
+    private static $instance;
+    private static $redis_db;
 
     private function __construct()
     {
-        // if (config('isUseEnv')) {
-        //     $this->initByEnv();
-        // } else {
-        //     $this->initByConfig();
-        // }
-        global $_CONFIG;
-        self::$dbConfig = $_CONFIG['database']['redis']['default'];
-        self::$redis = new Redis();
+        self::$instance = new Redis();
         try {
-            self::$redis->connect(self::$dbConfig['host'], self::$dbConfig['port']);
-            self::$redis->auth(self::$dbConfig['password']);
-            self::$redis->select(self::$dbConfig['dbindex']);
+            self::$instance->connect(self::$dbConfig['host'], self::$dbConfig['port']);
+            self::$instance->auth(self::$dbConfig['password']);
+            self::$instance->select(self::$dbConfig['database']);
         } catch (RedisException $e) {
             echo 'Error: ' . $e->getMessage();
             exit();
         }
     }
 
-    private function initByEnv()
+    public static function link($redis_db = 'default')
     {
-        self::$dbConfig = [
-            'host' => env('REDIS_HOST', ''),
-            'port' => env('REDIS_PORT'),
-            'password' => env('REDIS_PASSWORD'),
-            'dbindex' => env('REDIS_DBINDEX'),
-        ];
+        self::$redis_db = $redis_db;
+        return self::getInstance();
     }
 
-    public static function link()
+    public static function getInstance()
     {
-        if (self::$redis == null) {
+        if (self::$instance == null) {
+            global $_CONFIG;
+            self::$dbConfig = $_CONFIG['database']['redis'][self::$redis_db];
             new self;
         }
-        return self::$redis;
+        return self::$instance;
     }
 }

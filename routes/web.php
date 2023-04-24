@@ -11,4 +11,5 @@ Router::get('/hello', 'app\Controller\IndexController@hello');
 Router::get('/hello/:all', 'app\Controller\IndexController@hello');
 
 // For Testing Functions
-Router::any('/tests', 'Tests\Tests@index');
+Router::any('/tests', 'tests\Tests@index');
+Router::any('/tests/db', 'tests\Tests@db');

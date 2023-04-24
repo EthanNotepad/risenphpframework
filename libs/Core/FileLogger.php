@@ -18,7 +18,7 @@ class FileLogger
             PHP_EOL // Line break
         );
 
-        $pathLogs = PROJECT_ROOT_PATH . '/logs';
+        $pathLogs = PROJECT_ROOT_PATH . '/storage/logs';
         createFolder($pathLogs);
 
         // Use a log file name that includes the user ID if available

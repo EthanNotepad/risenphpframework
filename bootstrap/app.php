@@ -93,7 +93,7 @@ class App
 
     public static function deleteCache()
     {
-        $cacheDir = PROJECT_ROOT_PATH . '/runtime/cache';
+        $cacheDir = PROJECT_ROOT_PATH . '/storage/framework/cache';
         if (is_dir($cacheDir)) {
             $files = scandir($cacheDir);
             foreach ($files as $file) {

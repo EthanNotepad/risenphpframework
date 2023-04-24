@@ -8,8 +8,8 @@ class load
 {
     public static function loadConfigCache()
     {
-        createFolder(PROJECT_ROOT_PATH . '/runtime/cache');
-        $cacheFileConfig = PROJECT_ROOT_PATH . '/runtime/cache/config';
+        createFolder(PROJECT_ROOT_PATH . '/storage/framework/cache');
+        $cacheFileConfig = PROJECT_ROOT_PATH . '/storage/framework/cache/config';
         if (file_exists($cacheFileConfig) && !filesize($cacheFileConfig)) {
             // If the cache file exists but is empty, remove it to force a rebuild
             unlink($cacheFileConfig);
@@ -31,8 +31,8 @@ class load
 
     public static function loadRoutesCache()
     {
-        createFolder(PROJECT_ROOT_PATH . '/runtime/cache');
-        $cacheRoutesConfig = PROJECT_ROOT_PATH . '/runtime/cache/routes';
+        createFolder(PROJECT_ROOT_PATH . '/storage/framework/cache');
+        $cacheRoutesConfig = PROJECT_ROOT_PATH . '/storage/framework/cache/routes';
         if (file_exists($cacheRoutesConfig) && !filesize($cacheRoutesConfig)) {
             // If the cache file exists but is empty, remove it to force a rebuild
             unlink($cacheRoutesConfig);

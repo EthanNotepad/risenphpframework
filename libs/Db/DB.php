@@ -6,7 +6,7 @@ use PDO;
 use PDOException;
 use libs\Core\Message;
 
-class DB implements CoreDB
+class DB implements DbInterface
 {
     protected static $dbConfig;
 
@@ -14,7 +14,7 @@ class DB implements CoreDB
     private static $db_instance;
 
     private $table = '';
-    private $where = 'where (1 = 1)';
+    private $where = 'WHERE (1 = 1)';
     private $limit = '';
     private $order = '';
     private $field = ' * ';
@@ -35,7 +35,6 @@ class DB implements CoreDB
     private function __construct()
     {
         try {
-            self::$dbConfig = self::loadConfig();
             $this->db = new PDO($this->config(), self::$dbConfig['username'], self::$dbConfig['password']);
             // get only associative array
             $this->db->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
@@ -45,29 +44,22 @@ class DB implements CoreDB
         }
     }
 
-    public static function loadConfig()
+    public static function loadConfig($dbname)
     {
         global $_CONFIG;
-        if ($_CONFIG['app']['isUseEnv']) {
-            $conConfig = [
-                'host' => env('HOSTNAME', ''),
-                'port' => env('HOSTPORT'),
-                'username' => env('USERNAME'),
-                'password' => env('PASSWORD'),
-                'dbname' => env('DATABASE'),
-                'dbcharset' => env('CHARSET'),
-            ];
-            if (empty($conConfig['host'])) {
-                $conConfig = $_CONFIG['database']['connections'][$_CONFIG['database']['default']];
-            }
-        } else {
-            $conConfig = $_CONFIG['database']['connections'][$_CONFIG['database']['default']];
-        }
-        return $conConfig;
+        $db_config  = $_CONFIG['database']['connections'][$_CONFIG['database']['default']];
+        if (!empty($dbname))
+            $db_config['dbname'] = $dbname;
+        return $db_config;
     }
 
-    // Exposes a static method for easy invocation outside of an object
-    public static function link()
+    public static function link($dbname = '')
+    {
+        self::$dbConfig = self::loadConfig($dbname);
+        return self::getInstance();
+    }
+
+    public static function getInstance()
     {
         if (self::$db_instance == null) {
             self::$db_instance = new self;
@@ -144,27 +136,51 @@ class DB implements CoreDB
         // 将value值加上双引号，来避免sql注入
         if (is_array($where)) {
             foreach ($where as $item) {
-                $this->where .= 'and ';
-                foreach ($item as $k => $v) {
-                    if ($k == 2) {
-                        if (is_string($v)) {
-                            $v = '"' . $v . '"';
-                        }
+                $this->where .= ' AND ';
+                // equal 3 means that the user has specified the operator else use =
+                if (count($item) === 3) {
+                    $this->where .= $item[0] . ' ' . $item[1] . ' ';
+                    if (is_string($item[2])) {
+                        $this->where .= '"' . $item[2] . '"';
+                    } else {
+                        $this->where .= $item[2];
                     }
-                    $this->where .= $v;
+                } else {
+                    $this->where .= $item[0] . ' = ';
+                    if (is_string($item[1])) {
+                        $this->where .= '"' . $item[1] . '"';
+                    } else {
+                        $this->where .= $item[1];
+                    }
                 }
             }
         } else {
-            if (is_string($value)) {
-                $value = '"' . $value . '"';
+            // if value not empty, means that user has specified the operator
+            // @zh-CN: 如果第三个参数值不为空，则意味着用户定义了比较符（目前分别对1个参数，2个参数，3个参数的情况都做了处理）
+            if (!empty($value)) {
+                if (is_string($value)) {
+                    $value = '"' . $value . '"';
+                }
+                $this->where .= ' AND ' . $where . ' ' . $sep . ' ' . $value;
+            } elseif (!empty($sep)) {
+                // if value is empty, means that user has not specified the operator
+                // if sep is not empty, means that user has specified the value on the sep parameter
+                if (is_string($sep)) {
+                    $sep = '"' . $sep . '"';
+                }
+                $this->where .= ' AND ' . $where . ' = ' . $sep;
+            } else {
+                // if value and sep is empty, means that the user has customized the condition string of where, 
+                // but note that this is a dangerous action because it is easy to be injected
+                $this->where .= ' AND ' . $where;
             }
-            $this->where .= ' and ' . $where . ' ' . $sep . ' ' . $value;
         }
-        $this->where = str_replace('(1 = 1) and', ' ', $this->where);
+        $this->where = str_replace('(1 = 1) AND', ' ', $this->where);
         return self::$db_instance;
     }
 
     // FIXME Alias can be more artisan
+    // fetch all part
     public function select()
     {
         if (empty($this->table)) {
@@ -179,6 +195,7 @@ class DB implements CoreDB
         return $this->select();
     }
 
+    // fetch one part
     public function get()
     {
         if (empty($this->table)) {
@@ -202,6 +219,7 @@ class DB implements CoreDB
     {
         return $this->get();
     }
+    // fetch part end
 
     public function insert(array $vars)
     {
@@ -252,7 +270,7 @@ class DB implements CoreDB
         return self::link()->db->lastInsertId() ?? 0;
     }
 
-    protected function getSql()
+    public function getSql()
     {
         if (empty($this->table)) {
             Message::send(10400);
@@ -269,52 +287,18 @@ class DB implements CoreDB
         return $sql;
     }
 
+    // Output sql query
+    public function dd()
+    {
+        return $this->getSql();
+    }
+
     // Release the content to avoid querying the last data
     protected function free()
     {
         $this->field = '*';
-        $this->where = ' where (1 = 1) ';
+        $this->where = ' WHERE (1 = 1) ';
         $this->table = $this->limit = $this->order = '';
         $this->join = [];
-    }
-
-    // Output sql query, the parameter is the query method
-    public function dd($method = '', $data = [])
-    {
-        switch ($method) {
-            case 'get':
-                $sql = $this->getSql();
-                var_dump($sql);
-                $this->free();
-                break;
-            case 'insert':
-                if (empty($data)) {
-                    Message::send(10402);
-                }
-                $fields = '`' . implode('`,`', array_keys($data)) . '`';
-                $values = implode(',', array_fill(0, count($data), '?'));
-                $sql = "INSERT INTO {$this->table} ($fields) VALUES($values)";
-                var_dump($sql);
-                $this->free();
-                break;
-            case 'update':
-                if (empty($data)) {
-                    Message::send(10402);
-                }
-                $sql = "UPDATE {$this->table} SET " . implode('=?, ', array_keys($data)) . "=? {$this->where}";
-                var_dump($sql);
-                $this->free();
-                break;
-            case 'delete':
-                $sql = "DELETE FROM {$this->table} {$this->where}";
-                var_dump($sql);
-                $this->free();
-                break;
-            default:
-                print_r('Please pass in the correct method name');
-                $this->free();
-                break;
-        }
-        die;
     }
 }

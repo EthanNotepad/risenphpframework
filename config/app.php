@@ -16,7 +16,7 @@
  */
 
 return [
-    'displayErrors' => true,
+    'displayErrors' => env('APP_DEBUG', true),
     'defaultErrorMessage' => 'Error, please contact the administrator!',
     'isUseEnv' => true,
     'isConfigTimeZone' => false,

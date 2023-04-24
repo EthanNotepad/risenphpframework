@@ -16,7 +16,7 @@ class Test
 {
     public function test()
     {
-        $imagePath = PROJECT_ROOT_PATH . '/Tests/871475.jpeg';
+        $imagePath = PROJECT_ROOT_PATH . '/tests/871475.jpeg';
         $nowDateName = date('Ymd');
         // open pdf on browser
         $PDFGenerator = (new Rpdf)->makePicture($imagePath)->Output('I', 'draw_' . $nowDateName . '.pdf');

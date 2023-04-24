@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests;
+namespace tests;
 
 class Tests
 {
@@ -33,8 +33,8 @@ class Tests
          */
         if (0) {
             global $_CONFIG;
-            $displayErrors = config('app.displayErrors');
-            $displayErrorsFromGlobalConfig = $_CONFIG['app'];
+            $displayErrors = config('database.connections');
+            $displayErrorsFromGlobalConfig = $_CONFIG['database']['connections'];
             dump($displayErrors, $displayErrorsFromGlobalConfig);
         }
 
@@ -75,65 +75,11 @@ class Tests
          * Test bash64 file upload function
          */
         if (0) {
-            $filePath = PROJECT_ROOT_PATH . '/Tests/imageData.base64';
+            $filePath = PROJECT_ROOT_PATH . '/tests/imageData.base64';
             $imgData = file_get_contents($filePath);
             $uploader = new \app\Tool\UploadFiles();
             $imagePath = $uploader->uploadFilesBase64($imgData, 'public/upload/images/');
             echo $imagePath;
-        }
-
-        /**
-         * Test log database table functionality
-         */
-        if (0) {
-            $dbname = config('database.mysql.dbname');
-            $ishavelogssql = "SHOW TABLES IN $dbname WHERE Tables_in_$dbname = 'logs'";
-            $result = \libs\Db\DB::link()->query($ishavelogssql);
-            if (count($result)) {
-                \libs\Core\Logger::sensitive(1);
-            } else {
-                // If there is no logs table, a logs table will be created first
-                $sql = "CREATE TABLE `logs` (
-                    `id` int(11) NOT NULL AUTO_INCREMENT,
-                    `user_id` int(11) DEFAULT NULL,
-                    `action` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-                    `request_url` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-                    `status` tinyint(2) DEFAULT NULL COMMENT '1 success, 2 failure',
-                    `description` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-                    `log_type` tinyint(2) DEFAULT NULL COMMENT '1 web, 2 system',
-                    `ip_address` char(15) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-                    `user_agent` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-                    `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
-                    PRIMARY KEY (`id`)
-                  ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
-                \libs\Db\DB::link()->query($sql);
-                \libs\Core\Logger::sensitive(1);
-            }
-            echo 'moving on';
-        }
-
-        /**
-         * Test the database query function
-         */
-        if (0) {
-            $id = $_GET['id'] = "1 OR 1=1";     // test sql injection
-            $whereSql[] = array('logs.id', '=', $id);
-            $getOne = \libs\Db\DB::link()->table('logs')->where('id', '=', 59)->field('id', 'user_id')->getOne();
-            // dd($getOne);
-            $getAll = \libs\Db\DB::link()->table('logs')->where('id', '=', 1)->field('id', 'user_id')->limit(1, 100)->order("id ASC")->getAll();
-            $getCount = \libs\Db\DB::link()->table('logs')->where('id', '=', 3)->field('id')->count();
-            $getLeftJoin = \libs\Db\DB::link()->table('logs')->where($whereSql)->join('logs AS logs2', 'logs2.user_id = logs.id')->select();
-            $getFieldNotSafe = \libs\Db\DB::link()->table('logs')->where($whereSql)->join('logs AS logs2', 'logs2.user_id = logs.id')->fieldString('logs.id')->select();
-            // $getSqlDd = \libs\Db\DB::link()->table('logs')->where('id', '=', 1)->field('id', 'user_id')->limit(1, 100)->order("id ASC")->dd('get');
-
-            // Data insertion and getting the inserted id
-            $insertData = [
-                'user_id' => '3',
-                'action' => 'login'
-            ];
-            // \libs\Db\DB::link()->table('logs')->insert($insertData);
-            $insertId = \libs\Db\DB::link()->lastId();
-            dd($insertId);
         }
 
         /**
@@ -148,8 +94,8 @@ class Tests
          * Test the Redis function
          */
         if (0) {
-            // $redis = \libs\Factory\NosqlFactory::factory('redis'); // NoSql factory function
-            $redis = \libs\Db\RedisDB::link();
+            $redis = \libs\Factory\NosqlFactory::factory('redis'); // NoSql factory function
+            // $redis = \libs\Db\RedisDB::link('cache');
             $redis->set('mykey', 'shejibiji.com');
             echo $redis->get('mykey');
         }
@@ -190,5 +136,74 @@ class Tests
         echo '<br>';
         echo '<hr>';
         echo 'Testing End';
+        die;
+    }
+
+    public function db()
+    {
+        /**
+         * Test log database table functionality
+         */
+        if (0) {
+            $dbname = config('database.mysql.dbname');
+            $ishavelogssql = "SHOW TABLES IN $dbname WHERE Tables_in_$dbname = 'logs'";
+            $result = \libs\Db\DB::link()->query($ishavelogssql);
+            if (count($result)) {
+                \libs\Core\Logger::sensitive(1);
+            } else {
+                // If there is no logs table, a logs table will be created first
+                $sql = "CREATE TABLE `logs` (
+                    `id` int(11) NOT NULL AUTO_INCREMENT,
+                    `user_id` int(11) DEFAULT NULL,
+                    `action` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+                    `request_url` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+                    `status` tinyint(2) DEFAULT NULL COMMENT '1 success, 2 failure',
+                    `description` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+                    `log_type` tinyint(2) DEFAULT NULL COMMENT '1 web, 2 system',
+                    `ip_address` char(15) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+                    `user_agent` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+                    `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                    PRIMARY KEY (`id`)
+                  ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;";
+                \libs\Db\DB::link()->query($sql);
+                \libs\Core\Logger::sensitive(1);
+            }
+            echo 'moving on';
+        }
+
+        /**
+         * Test the database query function, support chain operation
+         */
+        if (1) {
+            $id = $_GET['id'] = "1 OR 1=1";     // test sql injection
+            $whereSql[] = array('logs.id', $id);
+            $whereSql[] = array('logs.user_id', 1);
+            // $where_test = \libs\Db\DB::link()->table('logs')->where($id)->dd(); // where statement have one parameters, note this is a dangerous action because easy to be injected
+            // $where_test = \libs\Db\DB::link()->table('logs')->where('id', $id)->dd(); // where statement have two parameters
+            // $where_test = \libs\Db\DB::link()->table('logs')->where('id', '=', $id)->dd(); // where statement have three parameters
+            // $where_test = \libs\Db\DB::link()->table('logs')->where($whereSql)->dd(); // where statement is an array
+            // $getOne = \libs\Db\DB::link('timetracker')->table('logs')->dd();  // support set dbname
+            // $getCount = \libs\Db\DB::link()->table('logs')->where('id', '=', 3)->field('id')->count();
+            // $getAll = \libs\Db\DB::link()->table('logs')->where('id', '=', 1)->field('id', 'user_id')->limit(1, 100)->order("id ASC")->getAll();
+            // $getLeftJoin = \libs\Db\DB::link()->table('logs')->where($whereSql)->join('logs AS logs2', 'logs2.user_id = logs.id')->select();
+            $getFieldNotSafe = \libs\Db\DB::link()->table('logs')->where($whereSql)->join('logs AS logs2', 'logs2.user_id = logs.id')->fieldString('count(*) AS total')->get();
+            dd($getFieldNotSafe);
+
+            // Data update and insert
+            // Data insertion and getting the inserted id
+            // $insertData = [
+            //     'user_id' => '3',
+            //     'action' => 'login'
+            // ];
+            // \libs\Db\DB::link()->table('logs')->insert($insertData);
+            // $insertId = \libs\Db\DB::link()->lastId();
+            // dd($insertId);
+        }
+
+        echo '<br>';
+        echo '<br>';
+        echo '<hr>';
+        echo 'DB Testing End';
+        die;
     }
 }
