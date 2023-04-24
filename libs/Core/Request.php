@@ -1,7 +1,5 @@
 <?php
 
-// TODO upgrade this class refer to tt project
-
 namespace libs\Core;
 
 class Request
@@ -23,27 +21,39 @@ class Request
         $this->query = $_SERVER['QUERY_STRING'];
     }
 
-    public function getParams()
+    public function param()
     {
         return $this->params;
     }
 
-    public function getMethod()
+    public function method()
     {
         return $this->method;
     }
 
-    public function getProtocol()
+    public function header($key = '')
+    {
+        $headers = getallheaders();
+        if (empty($key)) {
+            return $headers;
+        }
+        if (array_key_exists($key, $headers)) {
+            return $headers[$key];
+        }
+        return null;
+    }
+
+    public function protocol()
     {
         return $this->protocol;
     }
 
-    public function getHost()
+    public function host()
     {
         return $this->host;
     }
 
-    public function getPath()
+    public function path()
     {
         return $this->path;
     }
@@ -53,21 +63,27 @@ class Request
         return explode('/', parse_url($this->path, PHP_URL_PATH));;
     }
 
-    public function getQuery()
+    public function query()
     {
         return $this->query;
     }
 
-    public function getData()
+    public function input($isArray = true)
     {
-        $rawData = file_get_contents('php://input');
-        $jsonData = json_decode($rawData);
-        return $jsonData;
+        $queryRaw = file_get_contents('php://input');
+        if ($isArray) {
+            $queryJson = json_decode($queryRaw, true);
+            if (is_null($queryJson)) {
+                $queryJson = [];
+            }
+            return $queryJson;
+        }
+        return json_decode($queryRaw);
     }
 
     public function post(string $key = '')
     {
-        $postData = $this->params;
+        $postData = $_POST;
         if (!empty($key)) {
             if (array_key_exists($key, $postData)) {
                 return $postData[$key];
