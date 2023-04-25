@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.4.2 - 2023.04.26
+
+- optimize: `DB` class
+- Added: core `Model` class
+
 ## 0.4.1 - 2023.04.24
 
 - Change the src directory to an extended directory and move out of autoload.php

@@ -3,6 +3,7 @@
 namespace libs\Db;
 
 use Exception;
+use libs\Core\Config;
 use PDO;
 use PDOException;
 
@@ -14,7 +15,7 @@ class DB implements DbInterface
     private static $db_instance;
 
     private $table = '';
-    private $where = 'WHERE (1 = 1)';
+    private $where = ' WHERE (1 = 1)';
     private $limit = '';
     private $order = '';
     private $field = ' * ';
@@ -44,18 +45,41 @@ class DB implements DbInterface
         }
     }
 
-    public static function loadConfig($dbname)
+    public static function loadConfig($connect, $dbname)
     {
-        global $_CONFIG;
-        $db_config  = $_CONFIG['database']['connections'][$_CONFIG['database']['default']];
-        if (!empty($dbname))
+        if (empty($connect)) {
+            $connect = Config::get('database.default');
+        }
+        $db_config  = Config::get('database.connections.' . $connect);
+        if (empty($db_config)) {
+            throw new Exception("Exception: Database connection configuration does not exist");
+        }
+        if (!empty($dbname)) {
             $db_config['dbname'] = $dbname;
+        }
         return $db_config;
     }
 
-    public static function link($dbname = '')
+    /**
+     * @Description If the parameter passed in is empty, use the default database connection, 
+     *  otherwise use the passed in database connection, the format is: connection name.database name,
+     *  such as: mysql.testdb
+     *  If the parameter passed in does not have a connection symbol ".", it is considered to be the database name,
+     * @zh-CN: 如果传入的参数为空，则使用默认的数据库连接，否则使用传入的数据库连接，格式为：连接名.数据库名，如：mysql.testdb
+     *  如果传入的参数没有连接符“.”，则认为是数据库名，使用默认的数据库连接
+     * @DateTime 2023-04-25
+     * @param string $connect_and_dbnam like mysql.testdb or testdb
+     * @return object
+     */
+    public static function link($connect_and_dbname = '')
     {
-        self::$dbConfig = self::loadConfig($dbname);
+        $parts = explode('.', $connect_and_dbname, 2);
+        if (count($parts) === 2) {
+            self::$dbConfig = self::loadConfig($parts[0], $parts[1]);
+            return self::getInstance();
+        } else {
+            self::$dbConfig = self::loadConfig('', $parts[0]);
+        }
         return self::getInstance();
     }
 
@@ -73,9 +97,9 @@ class DB implements DbInterface
         return self::$db_instance;
     }
 
+    // @zh-CN: 仅支持一维数组,请勿传入多维数组
     public function field(...$fields)
     {
-        // @zh-CN: 仅支持一维数组,请勿传入多维数组(不应该有这种情况)
         // Add backticks to the field name to avoid sql injection
         foreach ($fields as $key => $value) {
             if (empty($value)) continue;
@@ -91,8 +115,12 @@ class DB implements DbInterface
         return self::$db_instance;
     }
 
-    // Users can customize the field statement of the query, 
-    // but it is not safe
+    /**
+     * @Description Users can customize the field statement of the query, but it is not safe
+     * @zh-CN: 用户可以自定义查询的字段语句，但是不安全
+     * @param string $fields like 'r.id, r.name'
+     * @return object
+     */
     public function fieldString(string $fields)
     {
         $this->field = $fields;
@@ -101,7 +129,7 @@ class DB implements DbInterface
 
     public function join(string $table, string $condition, string $type = 'LEFT')
     {
-        $this->join[] = $type . " JOIN " . $table . " ON " . $condition;
+        $this->join[] = " " . $type . " JOIN " . $table . " ON " . $condition;
         return self::$db_instance;
     }
 
@@ -153,9 +181,6 @@ class DB implements DbInterface
                         $this->where .= $key . ' = ' . $value;
                     }
                 }
-                foreach ($where as $condition) {
-                    $where[] = [$condition[0], $condition[1]];
-                }
             }
         } else {
             // if value not empty, means that user has specified the operator
@@ -178,7 +203,7 @@ class DB implements DbInterface
                 $this->where .= ' AND ' . $where;
             }
         }
-        $this->where = str_replace('(1 = 1) AND', ' ', $this->where);
+        $this->where = str_replace('(1 = 1) AND ', '', $this->where);
         return self::$db_instance;
     }
 
@@ -229,9 +254,57 @@ class DB implements DbInterface
         return count($this->query($sql));
     }
 
+    public function exists()
+    {
+        if (empty($this->table)) {
+            throw new Exception("Model error, missing table name.");
+        }
+        $this->limit(1);
+        $sql = $this->getSql();
+        $result = $this->queryOne($sql);
+        return !empty($result);
+    }
+
+    /**
+     * @Description get collection by page and perPage
+     * @zh-CN 根据页码和每页数量获取集合
+     * @DateTime 2023-04-26
+     * @param int $page - page number
+     * @param int $perPage - number of items per page
+     * @return array
+     */
+    public function paginate(int $page, int $perPage)
+    {
+        if (empty($this->table)) {
+            throw new Exception("Model error, missing table name.");
+        }
+
+        // Calculate the offset and limit values based on the page and perPage arguments
+        $offset = ($page - 1) * $perPage;
+        $limit = $perPage;
+        $this->limit($offset, $limit);
+
+        // Generate the SQL query with the offset and limit values
+        $sql = $this->getSql();
+
+        // Execute the query and return the results
+        return $this->query($sql);
+    }
+
     public function lastId()
     {
         return self::link()->db->lastInsertId() ?? 0;
+    }
+
+    public function last()
+    {
+        if (empty($this->table)) {
+            throw new Exception("Model error, missing table name.");
+        }
+        $this->limit(1);
+        $this->order('id DESC');
+        $sql = $this->getSql();
+        return $this->queryOne($sql);
     }
 
     public function getConfig()
@@ -309,12 +382,7 @@ class DB implements DbInterface
         if (is_array($this->join)) {
             $this->join = implode(' ', $this->join);
         }
-        $sql = "SELECT {$this->field} 
-        FROM {$this->table}
-        {$this->join}
-        {$this->where}
-        {$this->order}
-        {$this->limit}";
+        $sql = "SELECT {$this->field} FROM {$this->table}{$this->join}{$this->where}{$this->order}{$this->limit}";
         return $sql;
     }
 

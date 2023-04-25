@@ -11,6 +11,10 @@ class Message
      */
     const CODE_INFO = [
         200 => 'success',
+        401 => 'Unauthorized',
+        412 => 'Database error',
+
+        1000 => 'Unknown error',
     ];
 
     public static function send(int $code, array $data = [], string $message = '')
@@ -19,23 +23,27 @@ class Message
         header_remove('Set-Cookie');
         header('Content-Type: application/json');
 
+
+        if (in_array($code, array_keys(self::CODE_INFO))) {
+            $extraMessage = self::CODE_INFO[$code];
+        } else {
+            $extraMessage = self::CODE_INFO[1000];
+        }
         if (empty($message)) {
-            if (in_array($code, array_keys(self::CODE_INFO))) {
-                $message = self::CODE_INFO[$code];
-            } else {
-                $message = 'Unknown error';
-            }
+            $message = $extraMessage;
+        } else {
+            $message = $extraMessage . ': ' . $message;
         }
 
-        if ($code !== 200) {
-            FileLogger::warning('Failed to return data: [' . $code . '] ' . $message);
-        }
+        // if ($code !== 200) {
+        //     FileLogger::warning('Failed to return data: [' . $code . '] ' . $message);
+        // }
 
         // Define the returned API data format
         $returnMessage = json_encode(array(
             'code' => $code,
-            'message' => $message,
-            'data' => $data
+            'data' => $data,
+            'msg' => $message,
         ));
 
         echo $returnMessage;

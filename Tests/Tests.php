@@ -16,7 +16,7 @@ class Tests
          * Test the request function
          */
         if (0) {
-            $data = (new \libs\Core\Request)->getPath();
+            $data = (new \libs\Core\Request)->path();
             dd($data);
         }
 
@@ -37,7 +37,8 @@ class Tests
             global $_CONFIG;
             $displayErrors = config('database.connections');
             $displayErrorsFromGlobalConfig = $_CONFIG['database']['connections'];
-            dump($displayErrors, $displayErrorsFromGlobalConfig);
+            $displayErrorsFromConfigClass = \libs\Core\Config::get('database.connections');
+            dump($displayErrors, $displayErrorsFromGlobalConfig, $displayErrorsFromConfigClass);
         }
 
         /**
@@ -151,40 +152,40 @@ class Tests
         /**
          * Test the database query function, support chain operation
          */
-        if (0) {
-            $id = $_GET['id'] = "1 OR 1=1";     // test sql injection
-            // different where can handle same
-            $whereSql = [
-                0 => ['logs.id', $id],
-                1 => ['logs.user_id', '=', 1],
-            ];
-            $whereSql = [
-                'logs.id' => $id,
-                'logs.user_id' => 1,
-            ];
-            // dd(\libs\Db\DB::link()->getConfig());
-            // $where_test = \libs\Db\DB::link()->table('logs')->where($id)->dd(); // where statement have one parameters, note this is a dangerous action because easy to be injected
-            // $where_test = \libs\Db\DB::link()->table('logs')->where('id', $id)->dd(); // where statement have two parameters
-            // $where_test = \libs\Db\DB::link()->table('logs')->where('id', '=', $id)->dd(); // where statement have three parameters
-            // $where_test = \libs\Db\DB::link()->table('logs')->where($whereSql)->dd(); // where statement is an array
-            // $getOne = \libs\Db\DB::link('timetracker')->table('logs')->dd();  // support set dbname
-            $getCount = \libs\Db\DB::link()->table('logs')->where('id', '=', 3)->field('id')->count();
-            // $getAll = \libs\Db\DB::link()->table('logs')->where('id', '=', 1)->field('id', 'user_id')->limit(1, 100)->order("id ASC")->getAll();
-            // $getAll = \libs\Db\DB::link()->table('logs')->where('id', '=', 1)->field(['id', 'user_id'])->limit(1, 100)->order("id ASC")->getAll();
-            // $getLeftJoin = \libs\Db\DB::link()->table('logs')->where($whereSql)->join('logs AS logs2', 'logs2.user_id = logs.id')->select();
-            // $getFieldNotSafe = \libs\Db\DB::link()->table('logs')->where($whereSql)->join('logs AS logs2', 'logs2.user_id = logs.id')->fieldString('count(*) AS total')->get();
-            dd($getCount);
+        $id = $_GET['id'] = "1 OR 1=1";     // test sql injection
+        // different where can handle same
+        $whereSql = [
+            0 => ['logs.id', $id],
+            1 => ['logs.user_id', '=', 1],
+        ];
+        $whereSql = [
+            'logs.id' => $id,
+            'logs.user_id' => 1,
+        ];
+        $whereSql = "logs.id = $id AND logs.user_id = 1";
+        // dd(\libs\Db\DB::link()->getConfig());
+        // $where_test = \libs\Db\DB::link()->table('logs')->where($id)->dd(); // where statement have one parameters, note this is a dangerous action because easy to be injected
+        // $where_test = \libs\Db\DB::link()->table('logs')->where('id', $id)->dd(); // where statement have two parameters
+        // $where_test = \libs\Db\DB::link()->table('logs')->where('id', '=', $id)->dd(); // where statement have three parameters
+        // $where_test = \libs\Db\DB::link()->table('logs')->where($whereSql)->dd(); // where statement is an array
+        // $set_connect_and_dbname = \libs\Db\DB::link('mysql.timetracker')->table('logs')->dd();  // support set dbname
+        // $set_dbname = \libs\Db\DB::link('timetracker')->table('logs')->dd();  // support set dbname
+        // $getone_last = \libs\Db\DB::link()->table('logs')->order('id ASC')->limit(1, 10)->last();  // last function
+        // $getCount = \libs\Db\DB::link()->table('logs')->where('id', '=', 3)->field('id')->count();
+        // $getAll = \libs\Db\DB::link()->table('logs')->where('id', '=', 1)->field('id', 'user_id')->limit(1, 100)->order("id ASC")->getAll();
+        // $getLeftJoin = \libs\Db\DB::link()->table('logs')->where('id', '<>', 1)->field('id', 'logs')->join('logs AS logs2', 'logs2.user_id = logs.id')->limit(1, 10)->order('id ASC')->paginate(1, 10);
+        // $getFieldNotSafe = \libs\Db\DB::link()->table('logs')->where($whereSql)->join('logs AS logs2', 'logs2.user_id = logs.id')->fieldString('count(*) AS total')->get();
+        // dd($getLeftJoin);
 
-            // Data update and insert
-            // Data insertion and getting the inserted id
-            // $insertData = [
-            //     'user_id' => '3',
-            //     'action' => 'login'
-            // ];
-            // \libs\Db\DB::link()->table('logs')->insert($insertData);
-            // $insertId = \libs\Db\DB::link()->lastId();
-            // dd($insertId);
-        }
+        // Data update and insert
+        // Data insertion and getting the inserted id
+        // $insertData = [
+        //     'user_id' => '3',
+        //     'action' => 'login'
+        // ];
+        // \libs\Db\DB::link()->table('logs')->insert($insertData);
+        // $insertId = \libs\Db\DB::link()->lastId();
+        // dd($insertId);
 
         echo '<br>';
         echo '<br>';
