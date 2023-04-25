@@ -153,8 +153,15 @@ class Tests
          */
         if (0) {
             $id = $_GET['id'] = "1 OR 1=1";     // test sql injection
-            $whereSql[] = array('logs.id', $id);
-            $whereSql[] = array('logs.user_id', 1);
+            // different where can handle same
+            $whereSql = [
+                0 => ['logs.id', $id],
+                1 => ['logs.user_id', '=', 1],
+            ];
+            $whereSql = [
+                'logs.id' => $id,
+                'logs.user_id' => 1,
+            ];
             // dd(\libs\Db\DB::link()->getConfig());
             // $where_test = \libs\Db\DB::link()->table('logs')->where($id)->dd(); // where statement have one parameters, note this is a dangerous action because easy to be injected
             // $where_test = \libs\Db\DB::link()->table('logs')->where('id', $id)->dd(); // where statement have two parameters
@@ -163,6 +170,7 @@ class Tests
             // $getOne = \libs\Db\DB::link('timetracker')->table('logs')->dd();  // support set dbname
             $getCount = \libs\Db\DB::link()->table('logs')->where('id', '=', 3)->field('id')->count();
             // $getAll = \libs\Db\DB::link()->table('logs')->where('id', '=', 1)->field('id', 'user_id')->limit(1, 100)->order("id ASC")->getAll();
+            // $getAll = \libs\Db\DB::link()->table('logs')->where('id', '=', 1)->field(['id', 'user_id'])->limit(1, 100)->order("id ASC")->getAll();
             // $getLeftJoin = \libs\Db\DB::link()->table('logs')->where($whereSql)->join('logs AS logs2', 'logs2.user_id = logs.id')->select();
             // $getFieldNotSafe = \libs\Db\DB::link()->table('logs')->where($whereSql)->join('logs AS logs2', 'logs2.user_id = logs.id')->fieldString('count(*) AS total')->get();
             dd($getCount);

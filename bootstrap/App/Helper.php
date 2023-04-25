@@ -44,24 +44,38 @@ if (!function_exists('dump')) {
  * --------------------------------------------------------------------------------
  */
 if (!function_exists('config')) {
-    function config($key, $default_val = null)
+    function config($key, $default = null)
     {
-        $pathAndValue = explode('.', $key, 2);
+        $pathAndValue = explode('.', $key);
         if (count($pathAndValue) == 1) {
             // If the configuration file is not specified, the default is app.php
             $config_file = 'app';
-            $param = $pathAndValue[0];
+            $params = $pathAndValue;
         } else {
             $config_file = $pathAndValue[0];
-            $param  = $pathAndValue[1];
+            $params  = array_slice($pathAndValue, 1);
         }
-        $config_path = PROJECT_ROOT_PATH . '/config/' . $config_file . '.php';
-        if (file_exists($config_path)) {
+        global $_CONFIG;
+        if (is_null($_CONFIG)) {
+            $config_path = PROJECT_ROOT_PATH . '/config/' . $config_file . '.php';
+            if (!file_exists($config_path)) {
+                return $default;
+            }
             $config = include($config_path);
-            return $config[$param] ?? $default_val;
         } else {
-            return $default_val;
+            if (!isset($_CONFIG[$config_file])) {
+                return $default;
+            }
+            $config = $_CONFIG[$config_file];
         }
+        foreach ($params as $param) {
+            if (isset($config[$param])) {
+                $config = $config[$param];
+            } else {
+                return $default;
+            }
+        }
+        return $config;
     }
 }
 

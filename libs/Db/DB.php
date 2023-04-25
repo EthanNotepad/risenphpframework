@@ -75,8 +75,19 @@ class DB implements DbInterface
 
     public function field(...$fields)
     {
+        // @zh-CN: 仅支持一维数组,请勿传入多维数组(不应该有这种情况)
         // Add backticks to the field name to avoid sql injection
-        $this->field = '`' . implode('`,`', $fields) . '`';
+        foreach ($fields as $key => $value) {
+            if (empty($value)) continue;
+            if (is_array($value)) {
+                $fieldsSafe[$key] = '`' . implode('`,`', $value) . '`';
+            } else {
+                $fieldsSafe[$key] = '`' . $value . '`';
+            }
+        }
+        if (isset($fieldsSafe)) {
+            $this->field = implode(',', $fieldsSafe);
+        }
         return self::$db_instance;
     }
 
@@ -111,23 +122,39 @@ class DB implements DbInterface
         // Add double quotes to the value to avoid sql injection
         // 将value值加上双引号，来避免sql注入
         if (is_array($where)) {
-            foreach ($where as $item) {
-                $this->where .= ' AND ';
-                // equal 3 means that the user has specified the operator else use =
-                if (count($item) === 3) {
-                    $this->where .= $item[0] . ' ' . $item[1] . ' ';
-                    if (is_string($item[2])) {
-                        $this->where .= '"' . $item[2] . '"';
+            if (is_numeric(key($where))) {
+                // @zh-CN: 二维数组
+                foreach ($where as $item) {
+                    $this->where .= ' AND ';
+                    // equal 3 means that the user has specified the operator else use =
+                    if (count($item) === 3) {
+                        $this->where .= $item[0] . ' ' . $item[1] . ' ';
+                        if (is_string($item[2])) {
+                            $this->where .= '"' . $item[2] . '"';
+                        } else {
+                            $this->where .= $item[2];
+                        }
                     } else {
-                        $this->where .= $item[2];
+                        $this->where .= $item[0] . ' = ';
+                        if (is_string($item[1])) {
+                            $this->where .= '"' . $item[1] . '"';
+                        } else {
+                            $this->where .= $item[1];
+                        }
                     }
-                } else {
-                    $this->where .= $item[0] . ' = ';
-                    if (is_string($item[1])) {
-                        $this->where .= '"' . $item[1] . '"';
+                }
+            } else {
+                // @zh-CN: 一维数组
+                foreach ($where as $key => $value) {
+                    $this->where .= ' AND ';
+                    if (is_string($value)) {
+                        $this->where .= $key . ' = "' . $value . '"';
                     } else {
-                        $this->where .= $item[1];
+                        $this->where .= $key . ' = ' . $value;
                     }
+                }
+                foreach ($where as $condition) {
+                    $where[] = [$condition[0], $condition[1]];
                 }
             }
         } else {

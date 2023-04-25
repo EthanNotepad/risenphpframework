@@ -6,9 +6,9 @@ use src\fpdf\Core\FPDF;
 
 class Rpdf extends FPDF
 {
-    public function _construct($orientation = 'P', $unit = 'mm', $format = 'A4', $margin = 20)
+    public function __construct($orientation = 'P', $unit = 'mm', $format = 'A4', $margin = 10)
     {
-        $this->FPDF($orientation, $unit, $format);
+        parent::__construct($orientation, $unit, $format);
         $this->SetTopMargin($margin);
         $this->SetLeftMargin($margin);
         $this->SetRightMargin($margin);
