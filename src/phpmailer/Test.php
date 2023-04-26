@@ -24,7 +24,7 @@ class Test
         $content = "<h1>Test email</h1>
             <p>Test email</p>";
         $sendmail_model = new REmail;
-        $sendmail_model->setAttachment(PROJECT_ROOT_PATH . 'tests/871475.jpeg', '871475.jpeg');
+        $sendmail_model->setAttachment(PROJECT_ROOT_PATH . 'tests/RisenFramework.jpg', 'RisenFramework.jpg');
         $return = $sendmail_model->send($to_user, $title, $content);
         if ($return === true) {
             echo "Email send success";

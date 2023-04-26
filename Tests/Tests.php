@@ -169,13 +169,13 @@ class Tests
         // $where_test = \libs\Db\DB::link()->table('logs')->where('id', '=', $id)->dd(); // where statement have three parameters
         // $where_test = \libs\Db\DB::link()->table('logs')->where($whereSql)->dd(); // where statement is an array
         // $set_connect_and_dbname = \libs\Db\DB::link('mysql.timetracker')->table('logs')->dd();  // support set dbname
-        // $set_dbname = \libs\Db\DB::link('timetracker')->table('logs')->dd();  // support set dbname
+        // $set_dbname = \libs\Db\DB::link('mysql')->table('logs')->dd();  // support set dbname
         // $getone_last = \libs\Db\DB::link()->table('logs')->order('id ASC')->limit(1, 10)->last();  // last function
         // $getCount = \libs\Db\DB::link()->table('logs')->where('id', '=', 3)->field('id')->count();
         // $getAll = \libs\Db\DB::link()->table('logs')->where('id', '=', 1)->field('id', 'user_id')->limit(1, 100)->order("id ASC")->getAll();
         // $getLeftJoin = \libs\Db\DB::link()->table('logs')->where('id', '<>', 1)->field('id', 'logs')->join('logs AS logs2', 'logs2.user_id = logs.id')->limit(1, 10)->order('id ASC')->paginate(1, 10);
         // $getFieldNotSafe = \libs\Db\DB::link()->table('logs')->where($whereSql)->join('logs AS logs2', 'logs2.user_id = logs.id')->fieldString('count(*) AS total')->get();
-        // dd($getLeftJoin);
+        // dd($set_connect_and_dbname);
 
         // Data update and insert
         // Data insertion and getting the inserted id

@@ -64,11 +64,11 @@ class DB implements DbInterface
      * @Description If the parameter passed in is empty, use the default database connection, 
      *  otherwise use the passed in database connection, the format is: connection name.database name,
      *  such as: mysql.testdb
-     *  If the parameter passed in does not have a connection symbol ".", it is considered to be the database name,
+     *  If the parameter passed in does not have a connection symbol ".", it is considered to be the connection name.
      * @zh-CN: 如果传入的参数为空，则使用默认的数据库连接，否则使用传入的数据库连接，格式为：连接名.数据库名，如：mysql.testdb
-     *  如果传入的参数没有连接符“.”，则认为是数据库名，使用默认的数据库连接
+     *  如果传入的参数没有连接符“.”，则认为是连接名，数据库名使用对应的配置项内容
      * @DateTime 2023-04-25
-     * @param string $connect_and_dbnam like mysql.testdb or testdb
+     * @param string $connect_and_dbnam like mysql.testdb or mysql
      * @return object
      */
     public static function link($connect_and_dbname = '')
@@ -78,7 +78,7 @@ class DB implements DbInterface
             self::$dbConfig = self::loadConfig($parts[0], $parts[1]);
             return self::getInstance();
         } else {
-            self::$dbConfig = self::loadConfig('', $parts[0]);
+            self::$dbConfig = self::loadConfig($parts[0], '');
         }
         return self::getInstance();
     }
