@@ -23,20 +23,18 @@ class Validator extends ValidateRules
     public function validate()
     {
         $errors = [];
-
         foreach ($this->rules as $field => $rules) {
             foreach ($rules as $rule) {
-                // If a field rule is set, but there is no data to be validated for this field, then skip
-                if (!isset($this->data[$field])) {
-                    continue;
-                }
-
                 // Only validate the field if it has been set
                 if (!empty($this->fields) && !in_array($field, $this->fields)) {
                     continue;
                 }
 
-                $value = $this->data[$field];
+                if (isset($this->data[$field])) {
+                    $value = $this->data[$field];
+                } else {
+                    $value = null;
+                }
                 $params = null;
 
                 if (strpos($rule, ':') !== false) {

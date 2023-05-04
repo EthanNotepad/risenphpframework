@@ -34,11 +34,14 @@ class Tests
          * Test the config function
          */
         if (0) {
-            global $_CONFIG;
-            $displayErrors = config('database.connections');
-            $displayErrorsFromGlobalConfig = $_CONFIG['database']['connections'];
-            $displayErrorsFromConfigClass = \libs\Core\Config::get('database.connections');
-            dump($displayErrors, $displayErrorsFromGlobalConfig, $displayErrorsFromConfigClass);
+            dump(\libs\Core\Config::all());
+            // $displayErrors = config('database.connections');
+            // global $_CONFIG;
+            // $displayErrorsFromGlobalConfig = $_CONFIG['database']['connections'];
+            // $displayErrorsFromConfigClass = \libs\Core\Config::get('database.connections');
+            // \libs\Core\Config::set('database.connections.mariadb', 'test');
+            // $displayErrorsFromConfigClassNew = \libs\Core\Config::get('database.connections');
+            // dump($displayErrors, $displayErrorsFromGlobalConfig, $displayErrorsFromConfigClass, $displayErrorsFromConfigClassNew);
         }
 
         /**
