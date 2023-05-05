@@ -22,5 +22,6 @@ return [
     'isUseEnv' => true,
     'isConfigTimeZone' => false,
     'defaultTimeZone' => env('DEFAULT_TIMEZONE', 'PRC'),
+    'defaultLang' => env('DEFAULT_LANG', 'en'),
     'isCacheConfig' => false,
 ];

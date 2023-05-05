@@ -3,6 +3,7 @@
 namespace bootstrap;
 
 use libs\Core\CoreError;
+use libs\Core\Middleware\HandleCors;
 use libs\Core\Router;
 
 class App
@@ -106,6 +107,7 @@ class App
 
     public static function runAction()
     {
+        (new HandleCors())->handle();
         Router::dispatch();
     }
 }

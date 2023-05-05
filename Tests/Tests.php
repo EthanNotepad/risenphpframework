@@ -198,7 +198,7 @@ class Tests extends TestExtends
         // $insertId = \libs\Db\DB::link()->lastId();
         // dd($insertId);
 
-        if (1) {
+        if (0) {
             dd(TestModel::get(['id' => 1]));
         }
 
