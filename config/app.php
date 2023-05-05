@@ -16,6 +16,7 @@
  */
 
 return [
+    'appName' => env('APP_NAME', 'Risen PHP Framework'),
     'displayErrors' => env('APP_DEBUG', true),
     'defaultErrorMessage' => 'Error, please contact the administrator!',
     'isUseEnv' => true,

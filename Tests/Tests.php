@@ -4,8 +4,9 @@ namespace tests;
 
 use Exception;
 
-class Tests
+class Tests extends TestExtends
 {
+    protected static $params = 'Tests';
     /**
      * It can be used for testing,
      * Url: /tests
@@ -143,6 +144,13 @@ class Tests
             // dd($value);
         }
 
+        // Test extend function
+        // When both the subclass and the parent class have the same variable, 
+        // the variable value of the method call of the parent class is the value of the subclass
+        if (0) {
+            dd(self::getParams());
+        }
+
         echo '<br>';
         echo '<br>';
         echo '<hr>';
@@ -189,6 +197,10 @@ class Tests
         // \libs\Db\DB::link()->table('logs')->insert($insertData);
         // $insertId = \libs\Db\DB::link()->lastId();
         // dd($insertId);
+
+        if (1) {
+            dd(TestModel::get(['id' => 1]));
+        }
 
         echo '<br>';
         echo '<br>';
