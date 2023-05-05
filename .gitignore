@@ -4,3 +4,5 @@
 /storage/framework/cache/*
 /storage/logs/*
 /public/uploads/profile_photo/*
+
+/vendor/

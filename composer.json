@@ -1,0 +1,21 @@
+{
+  "name": "ethancheng/risen",
+  "autoload": {
+    "psr-4": {
+      "bootstrap\\": "bootstrap/",
+      "libs\\": "libs/",
+      "app\\": "app/",
+      "src\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "tests\\": "tests/"
+  },
+  "authors": [
+    {
+      "name": "EthanCheng",
+      "email": "svip2011@qq.com"
+    }
+  ],
+  "require": {}
+}
