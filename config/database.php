@@ -16,6 +16,8 @@ return [
             'password' => env('PASSWORD', '123456'),
             'dbname' => env('DATABASE', 'mydb'),
             'dbcharset' => env('CHARSET', 'utf8'),
+            'prefix' => '',
+            'prefix_indexes' => true,
         ],
         'mariadb' => [
             'host' => env('HOSTNAME', '127.0.0.1'),
@@ -24,6 +26,8 @@ return [
             'password' => env('PASSWORD', '123456'),
             'dbname' => env('DATABASE', 'mydb'),
             'dbcharset' => env('CHARSET', 'utf8'),
+            'prefix' => '',
+            'prefix_indexes' => true,
         ],
     ],
     'redis' => [

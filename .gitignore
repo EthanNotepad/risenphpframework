@@ -1,5 +1,6 @@
 .DS_Store
 /.vscode/
+/composer.lock
 /.env
 /storage/framework/cache/*
 /storage/logs/*

@@ -93,6 +93,9 @@ class DB implements DbInterface
 
     public function table(string $table)
     {
+        if (isset(self::$dbConfig['prefix_indexes']) && self::$dbConfig['prefix_indexes']) {
+            $table = self::$dbConfig['prefix'] . $table;
+        }
         $this->table = $table;
         return self::$db_instance;
     }

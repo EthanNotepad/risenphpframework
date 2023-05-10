@@ -5,12 +5,11 @@
       "bootstrap\\": "bootstrap/",
       "libs\\": "libs/",
       "app\\": "app/",
-      "src\\": "src/"
+      "src\\": "src/",
+      "tests\\": "tests/"
     }
   },
-  "autoload-dev": {
-    "tests\\": "tests/"
-  },
+  "autoload-dev": {},
   "authors": [
     {
       "name": "EthanCheng",

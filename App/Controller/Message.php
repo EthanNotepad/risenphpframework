@@ -20,8 +20,8 @@ class Message
     public static function send(int $code, array $data = [], string $message = '')
     {
         // Define the returned API data header
-        header_remove('Set-Cookie');
-        header('Content-Type: application/json');
+        // header_remove('Set-Cookie');
+        // header('Content-Type: application/json');
 
 
         if (in_array($code, array_keys(self::CODE_INFO))) {
