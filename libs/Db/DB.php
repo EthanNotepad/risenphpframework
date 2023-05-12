@@ -144,7 +144,9 @@ class DB implements DbInterface
 
     public function order(string $order)
     {
-        $this->order = " ORDER BY " . $order;
+        if (!empty($order)) {
+            $this->order = " ORDER BY " . $order;
+        }
         return self::$db_instance;
     }
 

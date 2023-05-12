@@ -4,7 +4,7 @@ namespace libs\Factory;
 
 class NosqlFactory
 {
-    public static function factory($className)
+    public static function factory($className, $params = '')
     {
         $className = strtolower($className);
         switch ($className) {
@@ -15,6 +15,6 @@ class NosqlFactory
                 // do nothing
         }
         $className = '\\libs\\Db\\' . $className;
-        return $className::link();
+        return $className::link($params);
     }
 }

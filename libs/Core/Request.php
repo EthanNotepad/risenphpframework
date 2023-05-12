@@ -81,6 +81,19 @@ class Request
         return json_decode($queryRaw);
     }
 
+    public function get(string $key = '')
+    {
+        $getData = $_GET;
+        if (!empty($key)) {
+            if (array_key_exists($key, $getData)) {
+                return $getData[$key];
+            } else {
+                return null;
+            }
+        }
+        return $getData;
+    }
+
     public function post(string $key = '')
     {
         $postData = $_POST;

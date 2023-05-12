@@ -122,22 +122,6 @@ if (!function_exists('value')) {
 
 /**
  * --------------------------------------------------------------------------------
- * generate a unique number
- * --------------------------------------------------------------------------------
- */
-if (!function_exists('generateNonUniqueNumber')) {
-    function generateNonUniqueNumber($digits)
-    {
-        $number = '';
-        for ($i = 0; $i < $digits; $i++) {
-            $number .= mt_rand(0, 9); // append a random digit to the number
-        }
-        return $number;
-    }
-}
-
-/**
- * --------------------------------------------------------------------------------
  * create a folder
  * --------------------------------------------------------------------------------
  */

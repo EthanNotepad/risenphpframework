@@ -6,8 +6,18 @@ use libs\Db\DB;
 
 abstract class Model
 {
+    // Define the table name, default table name is the same as the class name
     protected static $tablename = '';
+
+    // Define the database connection name, default is the default connection
     protected static $connection = '';
+
+    // Define the primary key, default is 'id'
+    protected static $primaryKey = 'id';
+
+    // Define the soft delete field, if it is empty, it means that the soft delete is not enabled, 
+    // or delete the field name of the soft delete
+    protected static $softdelete = '';
 
     public static function get(array $where, array $field = [])
     {
@@ -19,14 +29,20 @@ abstract class Model
         return $result;
     }
 
-    public static function getAll(array $where, array $field = [])
+    public static function getAll(array $where, array $field = [], $limit = 0, $offset = 40, $order = '', $orderType = '')
     {
         try {
-            $result = DB::link(static::$connection)->table(static::tablename())->field($field)->where($where)->getAll();
+            $order = self::handleOrder($order, $orderType);
+            $result = DB::link(static::$connection)->table(static::tablename())->field($field)->where($where)->limit($limit, $offset)->order($order)->select();
         } catch (\Exception $e) {
             return $e->getMessage();
         }
         return $result;
+    }
+
+    public static function all(array $where, array $field = [])
+    {
+        self::getAll($where, $field = []);
     }
 
     public static function insert(array $data)
@@ -39,7 +55,7 @@ abstract class Model
         return $result;
     }
 
-    public static function update(array $data, array $where)
+    public static function update(array $where, array $data)
     {
         try {
             $result = DB::link(static::$connection)->table(static::tablename())->where($where)->update($data);
@@ -52,7 +68,11 @@ abstract class Model
     public static function delete(array $where)
     {
         try {
-            $result = DB::link(static::$connection)->table(static::tablename())->where($where)->delete();
+            if (empty(static::$softdelete)) {
+                $result = DB::link(static::$connection)->table(static::tablename())->where($where)->delete();
+            } else {
+                $result = DB::link(static::$connection)->table(static::tablename())->where($where)->update([static::$softdelete => 1]);
+            }
         } catch (\Exception $e) {
             return $e->getMessage();
         }
@@ -79,7 +99,7 @@ abstract class Model
         return $result;
     }
 
-    public static function first(array $where, array $field = [])
+    public static function first(array $where = [], array $field = [])
     {
         try {
             $result = DB::link(static::$connection)->table(static::tablename())->field($field)->where($where)->first();
@@ -99,10 +119,21 @@ abstract class Model
         return $result;
     }
 
-    public static function paginate(int $page, int $perPage, array $where = [], array $field = [])
+    public static function paginate(int $page, int $perPage, array $where = [], array $field = [], $order = '', $orderType = '')
     {
         try {
-            $result = DB::link(static::$connection)->table(static::tablename())->field($field)->where($where)->paginate($page, $perPage);
+            $order = self::handleOrder($order, $orderType);
+            $result = DB::link(static::$connection)->table(static::tablename())->field($field)->where($where)->order($order)->paginate($page, $perPage);
+        } catch (\Exception $e) {
+            return $e->getMessage();
+        }
+        return $result;
+    }
+
+    public static function lastInsertId()
+    {
+        try {
+            $result = DB::link(static::$connection)->lastId();
         } catch (\Exception $e) {
             return $e->getMessage();
         }
@@ -118,5 +149,20 @@ abstract class Model
             static::$tablename = strtolower($class);
         }
         return static::$tablename;
+    }
+
+    public static function handleOrder($order, $orderType)
+    {
+        if (!empty($order) && !empty($orderType)) {
+            $order = $order . ' ' . $orderType;
+        } else {
+            if (!empty($orderType) && empty($order)) {
+                $order = static::$primaryKey . ' ' . $orderType;
+            }
+            if (empty($orderType) && !empty($order)) {
+                $order = $order . ' ASC';
+            }
+        }
+        return $order;
     }
 }

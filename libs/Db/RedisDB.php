@@ -19,7 +19,7 @@ class RedisDB implements DbInterface
             self::$instance->auth(self::$dbConfig['password']);
             self::$instance->select(self::$dbConfig['database']);
         } catch (RedisException $e) {
-            echo 'Error: ' . $e->getMessage();
+            echo 'Redis Error: ' . $e->getMessage();
             exit();
         }
     }

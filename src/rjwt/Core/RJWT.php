@@ -87,7 +87,7 @@ class RJWT
      * @param string $alg
      * @return array
      */
-    public static function decode(string $token, string $key = '', string $alg = ''): array | object
+    public static function decode(string $token, string $key = '', string $alg = '')
     {
         global $_CONFIG;
         $rjwtConfig = $_CONFIG['src']['rjwt'];
@@ -124,7 +124,7 @@ class RJWT
      * @param string $alg
      * @return array
      */
-    public static function verifyToken(string $token, string $key = '', string $alg = ''): array | bool
+    public static function verifyToken(string $token, string $key = '', string $alg = '')
     {
         // Verify the access token and return the payload
         global $_CONFIG;
@@ -144,7 +144,7 @@ class RJWT
      * @param string $alg
      * @return void
      */
-    public static function verifyRefreshToken(string $token, string $refresh_key = '', string $alg = ''): array | bool
+    public static function verifyRefreshToken(string $token, string $refresh_key = '', string $alg = '')
     {
         // Verify the access token and return the payload
         global $_CONFIG;
@@ -235,7 +235,7 @@ class RJWT
         return $decoded;
     }
 
-    private static function verifySignature(string $jwt, string $key, string $alg): bool
+    private static function verifySignature(string $jwt, string $key, string $alg)
     {
         $segments = explode('.', $jwt);
         if (count($segments) !== 3) {

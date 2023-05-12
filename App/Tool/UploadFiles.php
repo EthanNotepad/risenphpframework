@@ -17,7 +17,7 @@ class UploadFiles
             }
             $pathDir = PROJECT_ROOT_PATH . $path . date('Ymd', time()) . "/";
             createFolder($pathDir);
-            $ranNumber = generateNonUniqueNumber(3);
+            $ranNumber = (new \libs\Helper\Generate)->generateNonUniqueNumber(3);
             $time = time();
             $ranKey = $ranNumber . substr($time, 7);
             $new_file = $pathDir . $ranKey . '.' . $type;

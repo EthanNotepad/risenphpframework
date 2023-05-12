@@ -25,7 +25,7 @@ class ImageGenerator
         imagefill($im, 0, 0, $bg);
         $text_color = imagecolorallocate($im, min(rand(1, 254) + 50, 255), min(rand(1, 254) + 50, 255), min(rand(1, 254) + 50, 255));
         imagefttext($im, 88, 0, 12, 140, $text_color, PROJECT_ROOT_PATH . '/public/font/arial.ttf', $text);
-        $pathNew = $path . '/' . generateNonUniqueNumber(7) . substr(time(), 7) . '.png';
+        $pathNew = $path . '/' . (new \libs\Helper\Generate)->generateNonUniqueNumber(7) . substr(time(), 7) . '.png';
         imagepng($im, $pathNew);
         imagedestroy($im);
 
