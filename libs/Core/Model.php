@@ -13,6 +13,7 @@ abstract class Model
     protected static $connection = '';
 
     // Define the primary key, default is 'id'
+    // only used in the order method as the default order field now
     protected static $primaryKey = 'id';
 
     // Define the soft delete field, if it is empty, it means that the soft delete is not enabled, 
@@ -29,7 +30,7 @@ abstract class Model
         return $result;
     }
 
-    public static function getAll(array $where, array $field = [], $limit = 0, $offset = 40, $order = '', $orderType = '')
+    public static function getAll(array $where = [], array $field = [], $limit = 0, $offset = 40, $order = '', $orderType = '')
     {
         try {
             $order = self::handleOrder($order, $orderType);

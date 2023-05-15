@@ -106,4 +106,9 @@ class Request
         }
         return $postData;
     }
+
+    public function getFiles()
+    {
+        return $_FILES;
+    }
 }

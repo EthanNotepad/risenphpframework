@@ -157,9 +157,10 @@ class DB implements DbInterface
         if (is_array($where)) {
             if (is_numeric(key($where))) {
                 // @zh-CN: 二维数组
+                // support for array like [['id', '=', 1], ['name', '=', 'test']]
                 foreach ($where as $item) {
                     $this->where .= ' AND ';
-                    // equal 3 means that the user has specified the operator else use =
+                    // support for array like ['id', '=', 1], it will be converted to id = 1
                     if (count($item) === 3) {
                         $this->where .= $item[0] . ' ' . $item[1] . ' ';
                         if (is_string($item[2])) {
@@ -167,7 +168,11 @@ class DB implements DbInterface
                         } else {
                             $this->where .= $item[2];
                         }
+                    } elseif (is_array($item)) {
+                        // support for array like ['id' => 1], it will be converted to id = 1
+                        $this->where .= key($item) . ' = ' . '"' . $item[key($item)] . '"';
                     } else {
+                        // support for array like ['id', 1], it will be converted to id = 1
                         $this->where .= $item[0] . ' = ';
                         if (is_string($item[1])) {
                             $this->where .= '"' . $item[1] . '"';
@@ -178,6 +183,7 @@ class DB implements DbInterface
                 }
             } else {
                 // @zh-CN: 一维数组
+                // support for array like ['id' => 1, 'name' => 'test'], it will be converted to id = 1 AND name = 'test'
                 foreach ($where as $key => $value) {
                     $this->where .= ' AND ';
                     if (is_string($value)) {

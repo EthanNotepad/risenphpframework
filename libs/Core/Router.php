@@ -8,6 +8,7 @@ use libs\Core\Middleware\MiddlewareInterface;
 class Router
 {
     public static $halts = false;
+    public static $softroute = true;
     public static $routes = array();
     public static $methods = array();
     public static $callbacks = array();
@@ -66,6 +67,15 @@ class Router
     public static function haltOnMatch($flag = true)
     {
         self::$halts = $flag;
+    }
+
+    /**
+     * Whether to enable soft routing, default is true,
+     * if set to ture, app can find the corresponding class file according to the url
+     */
+    public static function setSoftRoute($flag = false)
+    {
+        self::$softroute = $flag;
     }
 
     /**
@@ -190,81 +200,84 @@ class Router
             }
         } else {
             // check  if the uri is defined with soft routing
+            if (self::$softroute) {
 
-            // Split the URI into an array of segments
-            $segments = explode('/', $uri);
+                // Split the URI into an array of segments
+                $segments = explode('/', $uri);
 
-            // Remove the first segment (the empty string)
-            array_shift($segments);
+                // Remove the first segment (the empty string)
+                array_shift($segments);
 
-            // Build the fully-qualified controller class name and method name from the segments
-            $controller = 'app\\Controller\\' . implode('\\', array_map('ucfirst', $segments)) . 'Controller';
-            $method = 'index';
+                // Build the fully-qualified controller class name and method name from the segments
+                $controller = 'app\\Controller\\' . implode('\\', array_map('ucfirst', $segments)) . 'Controller';
+                $functionName = 'index';
 
-            // Check if the fully-qualified controller class exists and the method is callable
-            if (class_exists($controller) && is_callable([$controller, $method])) {
-                $found_route = true;
-                // Create a new instance of the controller and call the method
-                $instance = new $controller();
-                $instance->$method();
-            } else {
-                // Check if defined with regex
-                $pos = 0;
-                foreach ($routesConfig['routes'] as $route) {
-                    if (strpos($route, ':') !== false) {
-                        $route = str_replace($searches, $replaces, $route);
-                    }
+                // Check if the fully-qualified controller class exists and the method is callable
+                if (class_exists($controller) && is_callable([$controller, $functionName])) {
+                    $found_route = true;
+                    // Create a new instance of the controller and call the method
+                    $instance = new $controller();
+                    $instance->$functionName();
 
-                    if (preg_match('#^' . $route . '$#', $uri, $matched)) {
-                        if ($routesConfig['methods'][$pos] == $method || $routesConfig['methods'][$pos] == 'ANY' || (!empty($routesConfig['maps'][$pos]) && in_array($method, $routesConfig['maps'][$pos]))) {
-                            $found_route = true;
+                    if ($routesConfig['halts']) return;
+                }
+            }
 
-                            // Remove $matched[0] as [1] is the first parameter.
-                            array_shift($matched);
+            // Check if defined with regex
+            $pos = 0;
+            foreach ($routesConfig['routes'] as $route) {
+                if (strpos($route, ':') !== false) {
+                    $route = str_replace($searches, $replaces, $route);
+                }
 
-                            // If there is a middleware passed, 
-                            // execute the middleware first
-                            if (!is_null($routesConfig['middleware'][$pos])) {
-                                $middleware = $routesConfig['middleware'][$pos];
-                                if (is_subclass_of($middleware, MiddlewareInterface::class)) {
-                                    $middlewareObj = new $middleware;
-                                    $middlewareObj->handle();
-                                } else {
-                                    throw new Exception("Invalid middleware class: $middleware");
-                                }
-                            }
+                if (preg_match('#^' . $route . '$#', $uri, $matched)) {
+                    if ($routesConfig['methods'][$pos] == $method || $routesConfig['methods'][$pos] == 'ANY' || (!empty($routesConfig['maps'][$pos]) && in_array($method, $routesConfig['maps'][$pos]))) {
+                        $found_route = true;
 
-                            if (!is_object($routesConfig['callbacks'][$pos])) {
+                        // Remove $matched[0] as [1] is the first parameter.
+                        array_shift($matched);
 
-                                // Grab all parts based on a / separator
-                                $parts = explode('/', $routesConfig['callbacks'][$pos]);
-
-                                // Collect the last index of the array
-                                $last = end($parts);
-
-                                // Grab the controller name and method call
-                                $segments = explode('@', $last);
-
-                                // Instanitate controller
-                                $controller = new $segments[0]();
-
-                                // Fix multi parameters
-                                if (!method_exists($controller, $segments[1])) {
-                                    throw new Exception('controller and action not found.');
-                                } else {
-                                    call_user_func_array(array($controller, $segments[1]), $matched);
-                                }
-
-                                if ($routesConfig['halts']) return;
+                        // If there is a middleware passed, 
+                        // execute the middleware first
+                        if (!is_null($routesConfig['middleware'][$pos])) {
+                            $middleware = $routesConfig['middleware'][$pos];
+                            if (is_subclass_of($middleware, MiddlewareInterface::class)) {
+                                $middlewareObj = new $middleware;
+                                $middlewareObj->handle();
                             } else {
-                                call_user_func_array($routesConfig['callbacks'][$pos], $matched);
-
-                                if ($routesConfig['halts']) return;
+                                throw new Exception("Invalid middleware class: $middleware");
                             }
                         }
+
+                        if (!is_object($routesConfig['callbacks'][$pos])) {
+                            // Grab all parts based on a / separator
+                            $parts = explode('/', $routesConfig['callbacks'][$pos]);
+
+                            // Collect the last index of the array
+                            $last = end($parts);
+
+                            // Grab the controller name and method call
+                            $segments = explode('@', $last);
+
+                            // Instanitate controller
+                            $controller = new $segments[0]();
+
+                            // Fix multi parameters
+                            if (!method_exists($controller, $segments[1])) {
+                                throw new Exception('controller and action not found.');
+                            } else {
+                                call_user_func_array(array($controller, $segments[1]), $matched);
+                            }
+
+                            if ($routesConfig['halts']) return;
+                        } else {
+                            call_user_func_array($routesConfig['callbacks'][$pos], $matched);
+
+                            if ($routesConfig['halts']) return;
+                        }
                     }
-                    $pos++;
                 }
+                $pos++;
             }
         }
 

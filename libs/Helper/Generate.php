@@ -42,13 +42,18 @@ class Generate
      * @param int $digits
      * @return string
      */
-    function generateNonUniqueNumber(int $digits): string
+    function generateNonUniqueNumber(int $digits, int $timeLength = 0): string
     {
         $number = '';
         for ($i = 0; $i < $digits; $i++) {
             $number .= mt_rand(0, 9); // append a random digit to the number
         }
-        return $number;
+        $timeNumber = '';
+        if ($timeLength !== 0) {
+            // Get the number at the end of the timestamp
+            $timeNumber = substr(time(), max(10 - $timeLength, 0));
+        }
+        return $number . $timeNumber;
     }
 
     /**

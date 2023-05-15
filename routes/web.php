@@ -8,7 +8,7 @@ Router::haltOnMatch();
 // homepage
 Router::get('/', 'app\Controller\IndexController@index');
 Router::get('/hello', 'app\Controller\IndexController@hello');
-Router::get('/hello/:all', 'app\Controller\IndexController@hello');
+Router::get('/hello/(:all)', 'app\Controller\IndexController@hello');
 
 // For Testing Functions
 Router::any('/tests', 'tests\Tests@index');
