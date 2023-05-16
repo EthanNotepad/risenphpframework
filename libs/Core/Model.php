@@ -23,7 +23,7 @@ abstract class Model
     public static function get(array $where, array $field = [])
     {
         try {
-            $result = DB::link(static::$connection)->table(static::tablename())->field($field)->where($where)->get();
+            $result = DB::link(static::$connection)->table(static::tablename())->field($field)->where(static::handleWhere($where))->get();
         } catch (\Exception $e) {
             return $e->getMessage();
         }
@@ -33,8 +33,8 @@ abstract class Model
     public static function getAll(array $where = [], array $field = [], $limit = 0, $offset = 40, $order = '', $orderType = '')
     {
         try {
-            $order = self::handleOrder($order, $orderType);
-            $result = DB::link(static::$connection)->table(static::tablename())->field($field)->where($where)->limit($limit, $offset)->order($order)->select();
+            $order = static::handleOrder($order, $orderType);
+            $result = DB::link(static::$connection)->table(static::tablename())->field($field)->where(static::handleWhere($where))->limit($limit, $offset)->order($order)->select();
         } catch (\Exception $e) {
             return $e->getMessage();
         }
@@ -43,7 +43,7 @@ abstract class Model
 
     public static function all(array $where, array $field = [])
     {
-        self::getAll($where, $field = []);
+        static::getAll($where, $field = []);
     }
 
     public static function insert(array $data)
@@ -60,6 +60,21 @@ abstract class Model
     {
         try {
             $result = DB::link(static::$connection)->table(static::tablename())->where($where)->update($data);
+        } catch (\Exception $e) {
+            return $e->getMessage();
+        }
+        return $result;
+    }
+
+    public static function updateOrInsert(array $where, array $data)
+    {
+        try {
+            $isExist = DB::link(static::$connection)->table(static::tablename())->where(static::handleWhere($where))->exists();
+            if ($isExist) {
+                $result = DB::link(static::$connection)->table(static::tablename())->where(static::handleWhere($where))->update($data);
+            } else {
+                $result = DB::link(static::$connection)->table(static::tablename())->insert($data);
+            }
         } catch (\Exception $e) {
             return $e->getMessage();
         }
@@ -83,7 +98,7 @@ abstract class Model
     public static function count(array $where = [])
     {
         try {
-            $result = DB::link(static::$connection)->table(static::tablename())->where($where)->count();
+            $result = DB::link(static::$connection)->table(static::tablename())->where(static::handleWhere($where))->count();
         } catch (\Exception $e) {
             return $e->getMessage();
         }
@@ -93,7 +108,7 @@ abstract class Model
     public static function exists(array $where)
     {
         try {
-            $result = DB::link(static::$connection)->table(static::tablename())->where($where)->exists();
+            $result = DB::link(static::$connection)->table(static::tablename())->where(static::handleWhere($where))->exists();
         } catch (\Exception $e) {
             return $e->getMessage();
         }
@@ -103,7 +118,7 @@ abstract class Model
     public static function first(array $where = [], array $field = [])
     {
         try {
-            $result = DB::link(static::$connection)->table(static::tablename())->field($field)->where($where)->first();
+            $result = DB::link(static::$connection)->table(static::tablename())->field($field)->where(static::handleWhere($where))->first();
         } catch (\Exception $e) {
             return $e->getMessage();
         }
@@ -113,7 +128,7 @@ abstract class Model
     public static function last(array $where, array $field = [])
     {
         try {
-            $result = DB::link(static::$connection)->table(static::tablename())->field($field)->where($where)->last();
+            $result = DB::link(static::$connection)->table(static::tablename())->field($field)->where(static::handleWhere($where))->last();
         } catch (\Exception $e) {
             return $e->getMessage();
         }
@@ -123,8 +138,8 @@ abstract class Model
     public static function paginate(int $page, int $perPage, array $where = [], array $field = [], $order = '', $orderType = '')
     {
         try {
-            $order = self::handleOrder($order, $orderType);
-            $result = DB::link(static::$connection)->table(static::tablename())->field($field)->where($where)->order($order)->paginate($page, $perPage);
+            $order = static::handleOrder($order, $orderType);
+            $result = DB::link(static::$connection)->table(static::tablename())->field($field)->where(static::handleWhere($where))->order($order)->paginate($page, $perPage);
         } catch (\Exception $e) {
             return $e->getMessage();
         }
@@ -165,5 +180,26 @@ abstract class Model
             }
         }
         return $order;
+    }
+
+    public static function handleWhere(array $where, bool $canEmpty = true)
+    {
+        // handle empty value in where array
+        if ($canEmpty) {
+            $where = array_filter($where, function ($value) {
+                return $value !== null;
+            });
+        } else {
+            $where = array_filter($where, function ($value) {
+                return $value !== null && $value !== '';
+            });
+        }
+
+        // handle softdelete
+        if (!empty(static::$softdelete) && !isset($where[static::$softdelete])) {
+            $where = array_merge($where, [static::$softdelete => 0]);
+        }
+
+        return $where;
     }
 }
