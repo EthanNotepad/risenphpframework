@@ -213,7 +213,7 @@ class Router
                 $functionName = 'index';
 
                 // Check if the fully-qualified controller class exists and the method is callable
-                if (class_exists($controller) && is_callable([$controller, $functionName])) {
+                if (class_exists($controller) && method_exists($controller, $functionName)) {
                     $found_route = true;
                     // Create a new instance of the controller and call the method
                     $instance = new $controller();

@@ -2,6 +2,8 @@
 
 namespace src\phpmailer;
 
+use libs\Core\Config;
+
 class REmail
 {
     protected $attachment = array();  // attachment @zh-cn: 附件
@@ -10,9 +12,8 @@ class REmail
     {
         try {
             // read config
-            global $_CONFIG;
-            $defaultConfig = $_CONFIG['src']['email']['driver'];
-            $conConfig = $_CONFIG['src']['email'][$defaultConfig];
+            $defaultConfig = Config::get('src.email.driver');
+            $conConfig = Config::get('src.email.' . $defaultConfig);
 
             // new phpmailer
             $mail = new \src\phpmailer\Core\PHPMailer(true);

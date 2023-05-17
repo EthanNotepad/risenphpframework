@@ -197,7 +197,7 @@ abstract class Model
 
         // handle softdelete
         if (!empty(static::$softdelete) && !isset($where[static::$softdelete])) {
-            $where = array_merge($where, [static::$softdelete => 0]);
+            $where = array_merge($where, [[static::$softdelete => 0]]);
         }
 
         return $where;

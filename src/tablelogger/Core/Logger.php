@@ -2,9 +2,7 @@
 
 namespace src\tablelogger\Core;
 
-use libs\Core\FileLogger;
 use libs\Db\DB;
-use PDOException;
 
 class Logger
 {

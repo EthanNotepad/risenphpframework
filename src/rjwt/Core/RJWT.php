@@ -2,6 +2,8 @@
 
 namespace src\rjwt\Core;
 
+use libs\Core\Config;
+
 class RJWT
 {
     const ALG_HS256 = 'HS256';
@@ -45,8 +47,7 @@ class RJWT
      */
     public static function encode(array $data, string $secret_key = '', $exp = 0, $alg = '', $refresh_switch = false, string $refresh_key = '', $refresh_expire_time = '')
     {
-        global $_CONFIG;
-        $rjwtConfig = $_CONFIG['src']['rjwt'];
+        $rjwtConfig = Config::get('src.rjwt');
 
         $default_alg = empty($alg) ? $rjwtConfig['default_alg'] : $alg;
         $secret_key = empty($secret_key) ? $rjwtConfig['secret_key'] : $secret_key;
@@ -89,8 +90,7 @@ class RJWT
      */
     public static function decode(string $token, string $key = '', string $alg = '')
     {
-        global $_CONFIG;
-        $rjwtConfig = $_CONFIG['src']['rjwt'];
+        $rjwtConfig = Config::get('src.rjwt');
 
         $parts = explode('.', $token);
         if (count($parts) !== 3) {
@@ -127,8 +127,7 @@ class RJWT
     public static function verifyToken(string $token, string $key = '', string $alg = '')
     {
         // Verify the access token and return the payload
-        global $_CONFIG;
-        $rjwtConfig = $_CONFIG['src']['rjwt'];
+        $rjwtConfig = Config::get('src.rjwt');
         $alg = empty($alg) ? $rjwtConfig['default_alg'] : $alg;
         $key = empty($key) ? $rjwtConfig['secret_key'] : $key;
         $payload = self::verify($token, $key, $alg);
@@ -147,8 +146,7 @@ class RJWT
     public static function verifyRefreshToken(string $token, string $refresh_key = '', string $alg = '')
     {
         // Verify the access token and return the payload
-        global $_CONFIG;
-        $rjwtConfig = $_CONFIG['src']['rjwt'];
+        $rjwtConfig = Config::get('src.rjwt');
         $alg = empty($alg) ? $rjwtConfig['default_alg'] : $alg;
         $refresh_key = empty($refresh_key) ? $rjwtConfig['refresh_key'] : $refresh_key;
         $payload = self::verify($token, $refresh_key, $alg);
@@ -209,8 +207,8 @@ class RJWT
 
     private static function is_blacklisted($jti)
     {
-        global $_CONFIG;
-        $blacklist = empty(self::$blacklist) ? $_CONFIG['src']['rjwt']['blacklist'] : self::$blacklist;
+        $blacklistConfig = Config::get('src.rjwt.blacklist');
+        $blacklist = empty(self::$blacklist) ? $blacklistConfig : self::$blacklist;
         return in_array($jti, $blacklist);
     }
 

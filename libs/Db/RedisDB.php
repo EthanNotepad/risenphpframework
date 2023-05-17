@@ -2,6 +2,7 @@
 
 namespace libs\Db;
 
+use libs\Core\Config;
 use Redis;
 use RedisException;
 
@@ -33,8 +34,7 @@ class RedisDB implements DbInterface
     public static function getInstance()
     {
         if (self::$instance == null) {
-            global $_CONFIG;
-            self::$dbConfig = $_CONFIG['database']['redis'][self::$redis_db];
+            self::$dbConfig = Config::get('database.redis.' .  self::$redis_db);
             new self;
         }
         return self::$instance;

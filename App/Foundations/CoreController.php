@@ -17,4 +17,9 @@ abstract class CoreController
     {
         // initialization, you can perform some pre-actions here
     }
+
+    public function index()
+    {
+        // soft routing will be here
+    }
 }

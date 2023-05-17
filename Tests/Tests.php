@@ -134,17 +134,7 @@ class Tests extends TestExtends
             }
         }
 
-        // Test the helper function
-        if (0) {
-            // dd(getenv(), env('APP_NAME', 'Risen')); // env function
-            // $value = value(function () {
-            //     return 'test';
-            // }, 'test');
-            // // $value = value('value', 'test');
-            // dd($value);
-        }
-
-        // Test extend function
+        // Test extends function
         // When both the subclass and the parent class have the same variable, 
         // the variable value of the method call of the parent class is the value of the subclass
         if (0) {

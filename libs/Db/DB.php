@@ -118,18 +118,6 @@ class DB implements DbInterface
         return self::$db_instance;
     }
 
-    /**
-     * @Description Users can customize the field statement of the query, but it is not safe
-     * @zh-CN: 用户可以自定义查询的字段语句，但是不安全
-     * @param string $fields like 'r.id, r.name'
-     * @return object
-     */
-    public function fieldString(string $fields)
-    {
-        $this->field = $fields;
-        return self::$db_instance;
-    }
-
     public function join(string $table, string $condition, string $type = 'LEFT')
     {
         $this->join[] = " " . $type . " JOIN " . $table . " ON " . $condition;
@@ -150,68 +138,51 @@ class DB implements DbInterface
         return self::$db_instance;
     }
 
-    public function where($where, $sep = '', $value = '')
+    public function where($where, $sep = '=', $value = '', $and = true)
     {
-        // Add double quotes to the value to avoid sql injection
-        // 将value值加上双引号，来避免sql注入
+        if ($and) {
+            $combineOperator = ' AND ';
+        } else {
+            $combineOperator = ' OR ';
+        }
+
+        // support custom default logical operator
+        $sep = ' ' . strtoupper($sep) . ' ';
+
         if (is_array($where)) {
-            if (is_numeric(key($where))) {
-                // @zh-CN: 二维数组
-                // support for array like [['id', '=', 1], ['name', '=', 'test']]
-                foreach ($where as $item) {
-                    $this->where .= ' AND ';
-                    // support for array like ['id', '=', 1], it will be converted to id = 1
+            foreach ($where as $key => $item) {
+                // ready to combine the where condition
+                $this->where .= $combineOperator;
+
+                // if: support array like: [0 => ['id', '=', 1], 1 => ['name', 'test'], 2 => ['age' => 18]]]
+                // else: support array like: [0 => 'id', 'key' => 'name']
+
+                if (is_numeric($key) && is_array($item)) {
+                    // support for array like ['id', '=', 1]
                     if (count($item) === 3) {
-                        $this->where .= $item[0] . ' ' . $item[1] . ' ';
-                        if (is_string($item[2])) {
-                            $this->where .= '"' . $item[2] . '"';
+                        $this->where .= $item[0] . ' ' . $item[1] . ' ' . $this->handleString($item[2]);
+                    } elseif (count($item) === 2) {
+                        // support for array like ['id', 1] or ['id', [1,2,3]]
+                        if (is_array($item[1])) {
+                            $this->where .= $item[0] . ' IN (' . implode(',', $item[1]) . ')';
                         } else {
-                            $this->where .= $item[2];
+                            $this->where .= $item[0] . $sep . $this->handleString($item[1]);
                         }
-                    } elseif (is_array($item)) {
-                        // support for array like ['id' => 1], it will be converted to id = 1
-                        $this->where .= key($item) . ' = ' . '"' . $item[key($item)] . '"';
-                    } else {
-                        // support for array like ['id', 1], it will be converted to id = 1
-                        $this->where .= $item[0] . ' = ';
-                        if (is_string($item[1])) {
-                            $this->where .= '"' . $item[1] . '"';
-                        } else {
-                            $this->where .= $item[1];
-                        }
+                    } elseif (count($item) === 1) {
+                        // support for array like ['id' => 1]
+                        $this->where .= key($item) . $sep . $this->handleString($item[key($item)]);
                     }
-                }
-            } else {
-                // @zh-CN: 一维数组
-                // support for array like ['id' => 1, 'name' => 'test'], it will be converted to id = 1 AND name = 'test'
-                foreach ($where as $key => $value) {
-                    $this->where .= ' AND ';
-                    if (is_string($value)) {
-                        $this->where .= $key . ' = "' . $value . '"';
-                    } else {
-                        $this->where .= $key . ' = ' . $value;
-                    }
+                } else {
+                    $this->where .= $key . $sep . $this->handleString($item);
                 }
             }
         } else {
-            // if value not empty, means that user has specified the operator
-            // @zh-CN: 如果第三个参数值不为空，则意味着用户定义了比较符（目前分别对1个参数，2个参数，3个参数的情况都做了处理）
             if (!empty($value)) {
-                if (is_string($value)) {
-                    $value = '"' . $value . '"';
-                }
-                $this->where .= ' AND ' . $where . ' ' . $sep . ' ' . $value;
-            } elseif (!empty($sep)) {
-                // if value is empty, means that user has not specified the operator
-                // if sep is not empty, means that user has specified the value on the sep parameter
-                if (is_string($sep)) {
-                    $sep = '"' . $sep . '"';
-                }
-                $this->where .= ' AND ' . $where . ' = ' . $sep;
+                // support for params like ('id', '=', 1) or ('id', '>', 1) or ('id', 'REGEXP', 'test')
+                $this->where .= $combineOperator . $where . $sep . $this->handleString($value);
             } else {
-                // if value and sep is empty, means that the user has customized the condition string of where, 
-                // but note that this is a dangerous action because it is easy to be injected
-                $this->where .= ' AND ' . $where;
+                // support for params like ('1'), it will be converted to id = 1
+                $this->where .= $combineOperator . 'id' . $sep . $this->handleString($where);
             }
         }
         $this->where = str_replace('(1 = 1) AND ', '', $this->where);
@@ -220,9 +191,6 @@ class DB implements DbInterface
 
     public function select()
     {
-        if (empty($this->table)) {
-            throw new Exception("Model error, missing table name.");
-        }
         $sql = $this->getSql();
         return $this->query($sql);
     }
@@ -234,9 +202,6 @@ class DB implements DbInterface
 
     public function get()
     {
-        if (empty($this->table)) {
-            throw new Exception("Model error, missing table name.");
-        }
         $sql = $this->getSql();
         return $this->queryOne($sql);
     }
@@ -258,18 +223,12 @@ class DB implements DbInterface
 
     public function count()
     {
-        if (empty($this->table)) {
-            throw new Exception("Model error, missing table name.");
-        }
         $sql = $this->getSql();
         return count($this->query($sql));
     }
 
     public function exists()
     {
-        if (empty($this->table)) {
-            throw new Exception("Model error, missing table name.");
-        }
         $this->limit(1);
         $sql = $this->getSql();
         $result = $this->queryOne($sql);
@@ -286,10 +245,6 @@ class DB implements DbInterface
      */
     public function paginate(int $page, int $perPage)
     {
-        if (empty($this->table)) {
-            throw new Exception("Model error, missing table name.");
-        }
-
         // Calculate the offset and limit values based on the page and perPage arguments
         $offset = ($page - 1) * $perPage;
         $limit = $perPage;
@@ -310,12 +265,20 @@ class DB implements DbInterface
     public function last()
     {
         if (empty($this->table)) {
-            throw new Exception("Model error, missing table name.");
+            throw new Exception("missing table name.");
         }
-        $this->limit(1);
-        $this->order('id DESC');
-        $sql = $this->getSql();
-        return $this->queryOne($sql);
+        $tableName = $this->table;
+        $dbname = self::$dbConfig['dbname'];
+        $sql = "SELECT column_name 
+        FROM information_schema.columns 
+        WHERE table_schema = '{$dbname}' AND table_name = '{$this->table}'";
+        $key = $this->queryOne($sql)['column_name'] ?? '';
+        if (empty($key)) {
+            throw new Exception("missing primary key.");
+        }
+        $this->order($key . ' DESC');
+        $this->table($tableName);
+        return $this->get();
     }
 
     public function getConfig()
@@ -326,7 +289,7 @@ class DB implements DbInterface
     public function insert(array $vars)
     {
         if (empty($this->table)) {
-            throw new Exception("Model error, missing table name.");
+            throw new Exception("missing table name.");
         }
         $fields = '`' . implode('`,`', array_keys($vars)) . '`';
         $values = implode(',', array_fill(0, count($vars), '?'));
@@ -337,10 +300,10 @@ class DB implements DbInterface
     public function update(array $vars)
     {
         if (empty($this->table)) {
-            throw new Exception("Model error, missing table name.");
+            throw new Exception("missing table name.");
         }
         if (empty($this->where)) {
-            throw new Exception("Model error, When updating or deleting, where is required.");
+            throw new Exception("When updating or deleting, where is required.");
         }
         $sql = "UPDATE {$this->table} SET " . implode('=?, ', array_keys($vars)) . "=? {$this->where}";
         return $this->execute($sql, array_values($vars));
@@ -349,10 +312,10 @@ class DB implements DbInterface
     public function delete()
     {
         if (empty($this->table)) {
-            throw new Exception("Model error, missing table name.");
+            throw new Exception("missing table name.");
         }
         if (empty($this->where)) {
-            throw new Exception("Model error, When updating or deleting, where is required.");
+            throw new Exception("When updating or deleting, where is required.");
         }
         $sql = "DELETE FROM {$this->table} {$this->where}";
         return $this->execute($sql);
@@ -388,7 +351,7 @@ class DB implements DbInterface
     public function getSql()
     {
         if (empty($this->table)) {
-            throw new Exception("Model error, missing table name.");
+            throw new Exception("missing table name.");
         }
         if (is_array($this->join)) {
             $this->join = implode(' ', $this->join);
@@ -410,5 +373,18 @@ class DB implements DbInterface
         $this->where = ' WHERE (1 = 1) ';
         $this->table = $this->limit = $this->order = '';
         $this->join = [];
+    }
+
+    /**
+     * @Description avoid sql injection, Add double quotes to the value to avoid sql injection
+     * @zh-CN: 将value值加上双引号，来避免sql注入
+     * @DateTime 2023-05-17
+     */
+    protected function handleString($value)
+    {
+        if (is_string($value)) {
+            $value = '"' . $value . '"';
+        }
+        return $value;
     }
 }

@@ -52,8 +52,7 @@ class CoreError
         if ($this->debug) {
             echo "<p>$errorMessage</p>";
         } else {
-            global $_CONFIG;
-            $defaultErrorMessage = $_CONFIG['app']['defaultErrorMessage'];
+            $defaultErrorMessage = Config::get('app.defaultErrorMessage');
             echo "<p>$defaultErrorMessage</p>";
         }
 
@@ -75,8 +74,7 @@ class CoreError
         if ($this->debug) {
             echo "<p>$errorMessage</p>";
         } else {
-            global $_CONFIG;
-            $defaultErrorMessage = $_CONFIG['app']['defaultErrorMessage'];
+            $defaultErrorMessage = Config::get('app.defaultErrorMessage');
             echo "<p>$defaultErrorMessage</p>";
         }
 
