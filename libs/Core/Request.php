@@ -107,8 +107,21 @@ class Request
         return $postData;
     }
 
-    public function getFiles()
+    public function file(string $key = '')
     {
-        return $_FILES;
+        $files = $_FILES;
+        if (!empty($key)) {
+            if (array_key_exists($key, $files)) {
+                return $files[$key];
+            } else {
+                return null;
+            }
+        }
+        return $files;
+    }
+
+    public function getFiles(string $key = '')
+    {
+        return $this->file($key);
     }
 }
