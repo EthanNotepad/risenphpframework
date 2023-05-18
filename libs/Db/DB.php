@@ -65,7 +65,7 @@ class DB implements DbInterface
      *  otherwise use the passed in database connection, the format is: connection name.database name,
      *  such as: mysql.testdb
      *  If the parameter passed in does not have a connection symbol ".", it is considered to be the connection name.
-     * @zh-CN: 如果传入的参数为空，则使用默认的数据库连接，否则使用传入的数据库连接，格式为：连接名.数据库名，如：mysql.testdb
+     * @zh-cn: 如果传入的参数为空，则使用默认的数据库连接，否则使用传入的数据库连接，格式为：连接名.数据库名，如：mysql.testdb
      *  如果传入的参数没有连接符“.”，则认为是连接名，数据库名使用对应的配置项内容
      * @DateTime 2023-04-25
      * @param string $connect_and_dbnam like mysql.testdb or mysql
@@ -100,7 +100,7 @@ class DB implements DbInterface
         return self::$db_instance;
     }
 
-    // @zh-CN: 仅支持一维数组,请勿传入多维数组
+    // @zh-cn: 仅支持一维数组,请勿传入多维数组
     public function field(...$fields)
     {
         // Add backticks to the field name to avoid sql injection
@@ -237,7 +237,7 @@ class DB implements DbInterface
 
     /**
      * @Description get collection by page and perPage
-     * @zh-CN 根据页码和每页数量获取集合
+     * @zh-cn 根据页码和每页数量获取集合
      * @DateTime 2023-04-26
      * @param int $page - page number
      * @param int $perPage - number of items per page
@@ -309,13 +309,13 @@ class DB implements DbInterface
         return $this->execute($sql, array_values($vars));
     }
 
-    public function delete()
+    public function delete($key = '')
     {
         if (empty($this->table)) {
             throw new Exception("missing table name.");
         }
-        if (empty($this->where)) {
-            throw new Exception("When updating or deleting, where is required.");
+        if ($this->where == ' WHERE (1 = 1)' && $key !== true) {
+            throw new Exception("Are you sure you want to delete all data? If you are sure, please pass in the parameter as true.");
         }
         $sql = "DELETE FROM {$this->table} {$this->where}";
         return $this->execute($sql);
@@ -360,6 +360,14 @@ class DB implements DbInterface
         return $sql;
     }
 
+    public function execSql()
+    {
+        // TODO not finshed
+        // save(), delete()
+        $params = func_get_args();
+        $modules = $params[0];
+    }
+
     // Output sql query
     public function dd()
     {
@@ -377,7 +385,7 @@ class DB implements DbInterface
 
     /**
      * @Description avoid sql injection, Add double quotes to the value to avoid sql injection
-     * @zh-CN: 将value值加上双引号，来避免sql注入
+     * @zh-cn: 将value值加上双引号，来避免sql注入
      * @DateTime 2023-05-17
      */
     protected function handleString($value)

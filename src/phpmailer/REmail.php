@@ -19,11 +19,11 @@ class REmail
             $mail = new \src\phpmailer\Core\PHPMailer(true);
 
             // set stmp 
-            // @zh: 使用smtp鉴权方式发送邮件
+            // @zh-cn: 使用smtp鉴权方式发送邮件
             $mail->IsSMTP();
 
             // set char 
-            // @zh-c n: 设置邮件的字符编码，这很重要，不然中文乱码 
+            // @zh-cn: 设置邮件的字符编码，这很重要，不然中文乱码 
             $mail->CharSet = 'UTF-8';
 
             // open smtp auth 

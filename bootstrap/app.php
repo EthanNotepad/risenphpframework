@@ -48,7 +48,7 @@ class App
     public static function appEnv()
     {
         if (config('isUseEnv')) {
-            $envFile = PROJECT_ROOT_PATH . '.env';
+            $envFile = PROJECT_ROOT_PATH . '/.env';
             if (file_exists($envFile)) {
                 $envLines = file($envFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
                 foreach ($envLines as $envLine) {
@@ -83,23 +83,27 @@ class App
         global $_CONFIG_ROUTE;
         $isCacheConfig = config('app.isCacheConfig');
         if ($isCacheConfig) {
-            $_CONFIG = load::loadConfigCache();
-            $_CONFIG_ROUTE = load::loadRoutesCache();
+            $_CONFIG = Load::loadConfigCache();
+            $_CONFIG_ROUTE = Load::loadRoutesCache();
         } else {
-            $_CONFIG = load::loadConfigFiles();
-            $_CONFIG_ROUTE = load::loadRoutesFiles();
+            $_CONFIG = Load::loadConfigFiles();
+            $_CONFIG_ROUTE = Load::loadRoutesFiles();
             self::deleteCache();
         }
     }
 
-    public static function deleteCache()
+    // clear all cache files
+    public static function deleteCache($dir = PROJECT_CACHE_PATH)
     {
-        $cacheDir = PROJECT_ROOT_PATH . '/storage/framework/cache';
-        if (is_dir($cacheDir)) {
-            $files = scandir($cacheDir);
+        if (is_dir($dir)) {
+            $files = scandir($dir);
             foreach ($files as $file) {
                 if ($file != '.' && $file != '..') {
-                    unlink($cacheDir . '/' . $file);
+                    if (is_file($dir . '/' . $file)) {
+                        unlink($dir . '/' . $file);
+                    } else {
+                        self::deleteCache($dir . '/' . $file);
+                    }
                 }
             }
         }
@@ -108,6 +112,7 @@ class App
     public static function runAction()
     {
         (new HandleCors())->handle();
+        // TODO: add middleware here
         Router::dispatch();
     }
 }

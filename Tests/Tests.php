@@ -141,6 +141,11 @@ class Tests extends TestExtends
             dd(self::getParams());
         }
 
+        // Test the lang helper
+        if (0) {
+            dd(lang('success', 'zh'));
+        }
+
         echo '<br>';
         echo '<br>';
         echo '<hr>';

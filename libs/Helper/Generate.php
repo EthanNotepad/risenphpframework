@@ -6,7 +6,7 @@ class Generate
 {
     /**
      * @Description generate random string
-     * @cn-zh 生成随机字符串
+     * @zh-cn 生成随机字符串
      * @DateTime 2023-05-12
      * @param int $length
      * @param bool $includeLetters
@@ -37,7 +37,7 @@ class Generate
 
     /**
      * @Description generate random number
-     * @cn-zh 生成随机数字
+     * @zh-cn 生成随机数字
      * @DateTime 2023-05-12
      * @param int $digits
      * @return string
@@ -58,7 +58,7 @@ class Generate
 
     /**
      * @Description generate token
-     * @cn-zh 生成token
+     * @zh-cn 生成token
      * @DateTime 2023-05-12
      * @param int $length
      * @return string

@@ -4,12 +4,12 @@ namespace bootstrap;
 
 use libs\Core\Router;
 
-class load
+class Load
 {
     public static function loadConfigCache()
     {
-        createFolder(PROJECT_ROOT_PATH . '/storage/framework/cache');
-        $cacheFileConfig = PROJECT_ROOT_PATH . '/storage/framework/cache/config';
+        createFolder(PROJECT_CACHE_PATH);
+        $cacheFileConfig = PROJECT_CACHE_PATH . '/config';
         if (file_exists($cacheFileConfig) && !filesize($cacheFileConfig)) {
             // If the cache file exists but is empty, remove it to force a rebuild
             unlink($cacheFileConfig);
@@ -19,11 +19,7 @@ class load
             return json_decode(file_get_contents($cacheFileConfig), true);
         } else {
             // Otherwise, read all PHP files from the config directory and write them to the cache
-            $config = [];
-            foreach (glob(PROJECT_ROOT_PATH . '/config/*.php') as $file) {
-                $key = str_replace('.php', '', basename($file));
-                $config[$key] = require $file;
-            }
+            $config = self::loadConfigFiles();
             file_put_contents($cacheFileConfig, json_encode($config));
             return $config;
         }
@@ -31,8 +27,8 @@ class load
 
     public static function loadRoutesCache()
     {
-        createFolder(PROJECT_ROOT_PATH . '/storage/framework/cache');
-        $cacheRoutesConfig = PROJECT_ROOT_PATH . '/storage/framework/cache/routes';
+        createFolder(PROJECT_CACHE_PATH);
+        $cacheRoutesConfig = PROJECT_CACHE_PATH . '/routes';
         if (file_exists($cacheRoutesConfig) && !filesize($cacheRoutesConfig)) {
             // If the cache file exists but is empty, remove it to force a rebuild
             unlink($cacheRoutesConfig);
@@ -50,8 +46,8 @@ class load
                 $reflectionProperty = $reflectionClass->getProperty($key);
                 return $reflectionProperty->isPublic() && $reflectionProperty->isStatic();
             }, ARRAY_FILTER_USE_KEY);
-            // FIXME After the route is cached, the callback function becomes an object
-            // 请修复: 路由缓存后，回调函数变成了对象，缓存文件里面内容变成了空数组，目前临时解决方案是直接报错
+            // FIXME After the route is cached, the closure function is not supported for the current framework version
+            // @zh-cn: 因为闭包函数不支持序列化，因此目前不支持调用的类为闭包函数的情况
             foreach ($staticVars['callbacks'] as $key => $value) {
                 if (is_object($value)) {
                     throw new \Exception('After the routing cache is enabled, the closure function is not supported for the this framework version');

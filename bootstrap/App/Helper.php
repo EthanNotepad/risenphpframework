@@ -55,6 +55,7 @@ if (!function_exists('config')) {
             $config_file = $pathAndValue[0];
             $params  = array_slice($pathAndValue, 1);
         }
+
         global $_CONFIG;
         if (is_null($_CONFIG)) {
             $config_path = PROJECT_ROOT_PATH . '/config/' . $config_file . '.php';
@@ -68,6 +69,7 @@ if (!function_exists('config')) {
             }
             $config = $_CONFIG[$config_file];
         }
+
         foreach ($params as $param) {
             if (isset($config[$param])) {
                 $config = $config[$param];
@@ -112,7 +114,41 @@ if (!function_exists('env')) {
     }
 }
 
-// Return the default value of the given value.
+/**
+ * --------------------------------------------------------------------------------
+ * Get the translation of the given string.
+ * --------------------------------------------------------------------------------
+ */
+if (!function_exists('lang')) {
+    function lang(string $translation, string $language = 'en')
+    {
+        global $_CONFIG_LANG;
+        if (!isset($_CONFIG_LANG[$language])) {
+            // read cache file first
+            createFolder(PROJECT_CACHE_PATH);
+            $cacheFileConfig = PROJECT_CACHE_PATH . '/lang' . '_' . $language;
+            if (file_exists($cacheFileConfig) && !filesize($cacheFileConfig)) {
+                $_CONFIG_LANG[$language] = json_decode(file_get_contents($cacheFileConfig), true);
+            } else {
+                // if cache file not exist, read from lang folder
+                $_CONFIG_LANG[$language] = [];
+                foreach (glob(PROJECT_ROOT_PATH . '/lang/' . $language . '/*.php') as $filename) {
+                    $_CONFIG_LANG[$language] = array_merge($_CONFIG_LANG[$language], include $filename);
+                }
+            }
+        }
+        if (isset($_CONFIG_LANG[$language][$translation])) {
+            return $_CONFIG_LANG[$language][$translation];
+        }
+        return $translation;
+    }
+}
+
+/**
+ * --------------------------------------------------------------------------------
+ * Return the default value of the given value.
+ * --------------------------------------------------------------------------------
+ */
 if (!function_exists('value')) {
     function value($value, ...$args)
     {
@@ -122,7 +158,7 @@ if (!function_exists('value')) {
 
 /**
  * --------------------------------------------------------------------------------
- * create a folder
+ * create a folder by safe way
  * --------------------------------------------------------------------------------
  */
 if (!function_exists('createFolder')) {
