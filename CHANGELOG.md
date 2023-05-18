@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.0 - 2023.05.18
+
+- upgrade framework version
+
 ## 0.4.2 - 2023.04.26
 
 - optimize: `DB` class
