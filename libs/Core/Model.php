@@ -41,9 +41,9 @@ abstract class Model
         return $result;
     }
 
-    public static function all(array $where, array $field = [])
+    public static function all(array $where = [], array $field = [])
     {
-        static::getAll($where, $field = []);
+        return static::getAll($where, $field);
     }
 
     public static function insert(array $data)

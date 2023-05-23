@@ -6,6 +6,9 @@ class ValidateRules
 {
     protected function validate_required($value, $params, $data)
     {
+        if (is_numeric($value) || is_bool($value)) {
+            return true;
+        }
         return !empty($value);
     }
 
@@ -66,6 +69,14 @@ class ValidateRules
             return true;
         }
         return filter_var($value, FILTER_VALIDATE_EMAIL) !== false;
+    }
+
+    protected function validate_phone($value, $params, $data)
+    {
+        if (empty($value)) {
+            return true;
+        }
+        return preg_match('/^1[34578]\d{9}$/', $value);
     }
 
     protected function validate_integer($value, $params, $data)

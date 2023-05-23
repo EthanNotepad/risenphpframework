@@ -23,12 +23,71 @@ class HttpRequest
         curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $this->method);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_HTTPHEADER, $this->headers);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, $this->body);
+
+        // Check if file data is present
+        $postData = $this->ishaveFile();
+        if ($postData === false) {
+            // Set the post fields
+            curl_setopt($ch, CURLOPT_POSTFIELDS, $this->body);
+        } else {
+            // Set the post fields with the file data
+            curl_setopt($ch, CURLOPT_POSTFIELDS, $postData);
+        }
+
         $response = curl_exec($ch);
         curl_close($ch);
         return $response;
     }
 
+    public function setHeaders($headers)
+    {
+        $this->headers = $headers;
+        return $this;
+    }
+
+    public function setBody(array $body)
+    {
+        switch ($this->method) {
+            case 'GET':
+                $this->url .= '?' . http_build_query($body);
+                break;
+            default:
+                $this->body = json_encode($body);
+        }
+        return $this;
+    }
+
+    public function setMethod($method)
+    {
+        $this->method = strtoupper($method);
+        return $this;
+    }
+
+    public function ishaveFile()
+    {
+        // Check if file data is present
+        $isHaveFile = false;
+        if (is_array($this->body)) {
+            $postData = array();
+            foreach ($this->body as $key => $value) {
+                // Check if the value is a file (assuming it's a string representing the file path)
+                if (is_string($value) && file_exists($value)) {
+                    $isHaveFile = true;
+                    $file = new \CURLFile($value);
+                    $postData[$key] = $file;
+                } else {
+                    $postData[$key] = $value;
+                }
+            }
+        }
+        if ($isHaveFile) {
+            return $postData;
+        } else {
+            return $isHaveFile;
+        }
+    }
+
+    // not sure whether need this
     public function get()
     {
         $this->method = 'GET';

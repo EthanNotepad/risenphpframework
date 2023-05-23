@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.0.1 - 2023.05.23
+
+- Fixed: ValidateRules class validate_required
+  (In the previous version, if the value passed in was 0, the wrong return failed)
+- Fixed: Model class all function (not useful before)
+- Upgraded: HttpRequest class (support file upload)
+- Added: ValidateRules validate_phone
+- Added: Registry class (used to store and access shared data or resources)
+
 ## 1.0.0 - 2023.05.18
 
 - upgrade framework version
