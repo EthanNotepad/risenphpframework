@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.2 - 2023.05.24
+
+- Added: Request class functions(getBody, contentType, isAjax)
+- Fixed: HttpRequest class(support body include file path)
+- Upgraded: UploadFiles class(support more params)
+
 ## 1.0.1 - 2023.05.23
 
 - Fixed: ValidateRules class validate_required

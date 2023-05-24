@@ -124,4 +124,22 @@ class Request
     {
         return $this->file($key);
     }
+
+    public function getBody()
+    {
+        return $this->input();
+    }
+
+    public function contentType()
+    {
+        return $this->header('Content-Type');
+    }
+
+    public function isAjax()
+    {
+        if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest') {
+            return true;
+        }
+        return false;
+    }
 }

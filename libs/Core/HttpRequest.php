@@ -9,7 +9,7 @@ class HttpRequest
     public $headers;
     public $body;
 
-    public function __construct($url, $method = 'GET', $headers = [], $body = '')
+    public function __construct($url, $method = 'GET', $headers = [], $body = [])
     {
         $this->url = $url;
         $this->method = $method;
@@ -19,23 +19,51 @@ class HttpRequest
 
     public function send()
     {
+        // Initialize the curl
         $ch = curl_init($this->url);
+
+        // Set the curl options
         curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $this->method);
+
+        // Set the return type as string
+        // @zh-cn: 设置以字符串形式将结果返回
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, $this->headers);
 
         // Check if file data is present
-        $postData = $this->ishaveFile();
+        $postData = $this->isHaveFile();
         if ($postData === false) {
-            // Set the post fields
-            curl_setopt($ch, CURLOPT_POSTFIELDS, $this->body);
-        } else {
+            $this->headers[] = 'Content-Type: application/json';
+            // Set the post fields with the json data
+            curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($this->body));
+        } elseif (is_array($postData)) {
             // Set the post fields with the file data
+            $this->headers[] = 'Content-Type: multipart/form-data';
             curl_setopt($ch, CURLOPT_POSTFIELDS, $postData);
+        } else {
+            // Set the post fields with the normal data, not used for now
+            curl_setopt($ch, CURLOPT_POSTFIELDS, $this->body);
         }
 
+        // Set the request headers
+        if (!empty($this->headers)) {
+            curl_setopt($ch, CURLOPT_HTTPHEADER, $this->headers);
+        }
+
+        // Execute the curl
         $response = curl_exec($ch);
+
+        // Check for curl errors
+        if (curl_errno($ch)) {
+            throw new \Exception('Curl error: ' . curl_error($ch));
+        }
+
+        // Get the HTTP response code
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+
+        // Close the curl
         curl_close($ch);
+
+        // Return the response
         return $response;
     }
 
@@ -45,6 +73,7 @@ class HttpRequest
         return $this;
     }
 
+    // Note: $body is an array like ['key' => 'value']， Multidimensional arrays are not supported
     public function setBody(array $body)
     {
         switch ($this->method) {
@@ -52,7 +81,7 @@ class HttpRequest
                 $this->url .= '?' . http_build_query($body);
                 break;
             default:
-                $this->body = json_encode($body);
+                $this->body = $body;
         }
         return $this;
     }
@@ -63,7 +92,7 @@ class HttpRequest
         return $this;
     }
 
-    public function ishaveFile()
+    public function isHaveFile()
     {
         // Check if file data is present
         $isHaveFile = false;
@@ -80,11 +109,7 @@ class HttpRequest
                 }
             }
         }
-        if ($isHaveFile) {
-            return $postData;
-        } else {
-            return $isHaveFile;
-        }
+        return $isHaveFile ? $postData : false;
     }
 
     // not sure whether need this

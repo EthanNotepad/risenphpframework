@@ -7,6 +7,7 @@ use libs\Helper\Generate;
 class UploadFiles
 {
     private $uploadDir = PROJECT_ROOT_PATH . 'public/upload/images/';
+    private $maxFileSize = 5 * 1024 * 1024; // 5 MB
 
     public function __construct()
     {
@@ -37,19 +38,13 @@ class UploadFiles
         }
     }
 
-    public function upload($file)
+    public function upload($file, $type = 'all')
     {
         $targetDir = rtrim($this->uploadDir, '/') . '/';
         createFolder($targetDir);
         $filename = (new Generate)->generateNonUniqueNumber(5, 5);
         $targetFile = $targetDir . $filename . '.' . pathinfo($file['name'], PATHINFO_EXTENSION);
         $imageFileType = strtolower(pathinfo($targetFile, PATHINFO_EXTENSION));
-
-        // Check if the file is an image
-        $check = getimagesize($file['tmp_name']);
-        if ($check === false) {
-            return false; // Not an image file
-        }
 
         // Check if the file already exists
         if (file_exists($targetFile)) {
@@ -58,15 +53,22 @@ class UploadFiles
 
         // Check file size (if needed)
         // Adjust the maximum file size as per your requirements
-        $maxFileSize = 5 * 1024 * 1024; // 5 MB
-        if ($file['size'] > $maxFileSize) {
+        if ($file['size'] > $this->maxFileSize) {
             return false; // File size exceeds the limit
         }
 
-        // Allow only specific image file formats (you can customize this)
-        $allowedFormats = array('jpg', 'jpeg', 'png', 'gif');
+        // Allow only specific file formats
+        if ($type == 'image') {
+            $allowedFormats = array('jpg', 'jpeg', 'png', 'gif');
+        } elseif ($type == 'video') {
+            $allowedFormats = array('mp4', 'avi', 'mov', 'wmv', 'flv', '3gp', 'mkv');
+        } elseif ($type == 'audio') {
+            $allowedFormats = array('mp3', 'wav', 'wma', 'aac', 'ogg', 'flac', 'alac');
+        } else {
+            $allowedFormats = array('jpg', 'jpeg', 'png', 'gif', 'mp4', 'avi', 'mov', 'wmv', 'flv', '3gp', 'mkv', 'mp3', 'wav', 'wma', 'aac', 'ogg', 'flac', 'alac', 'sql', 'php', 'txt', 'pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'zip', 'rar', 'tar', 'gz', '7z');
+        }
         if (!in_array($imageFileType, $allowedFormats)) {
-            return false; // Invalid image format
+            return false; // not allowed file format
         }
 
         // Move the uploaded file to the target directory
@@ -74,6 +76,6 @@ class UploadFiles
             return false; // Failed to move the file
         }
 
-        return $targetFile; // Return the image address
+        return $targetFile; // Return the uploaded file path
     }
 }
