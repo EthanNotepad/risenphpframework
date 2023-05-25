@@ -45,7 +45,7 @@ class DB implements DbInterface
         }
     }
 
-    public static function loadConfig($connect, $dbname)
+    public static function loadConfig($connect = '', $dbname = '')
     {
         if (empty($connect)) {
             $connect = Config::get('database.default');
@@ -172,7 +172,11 @@ class DB implements DbInterface
                         // support for array like ['id' => 1]
                         $this->where .= key($item) . $sep . $this->handleString($item[key($item)]);
                     }
+                } elseif (is_numeric($key) && !is_array($item)) {
+                    // support for array like ['id = 1', 'name = test'], but note that it's not safe
+                    $this->where .= $item;
                 } else {
+                    // support for array like ['id' => 1, 'name' => 'test']
                     $this->where .= $key . $sep . $this->handleString($item);
                 }
             }
@@ -181,11 +185,11 @@ class DB implements DbInterface
                 // support for params like ('id', '=', 1) or ('id', '>', 1) or ('id', 'REGEXP', 'test')
                 $this->where .= $combineOperator . $where . $sep . $this->handleString($value);
             } else {
-                // support for params like ('1'), it will be converted to id = 1
-                $this->where .= $combineOperator . 'id' . $sep . $this->handleString($where);
+                // support for params like ('id = 1') or ('id = 1 OR id = 2'), but note that it's not safe
+                $this->where .= $combineOperator . $where;
             }
         }
-        $this->where = str_replace('(1 = 1) AND ', '', $this->where);
+        $this->where = str_replace('(1 = 1)' . $combineOperator, '', $this->where);
         return self::$db_instance;
     }
 

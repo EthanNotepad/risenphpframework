@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.0.3 - 2023.05.25
+
+- Added: index page add version
+- Optimize: `DB` class(Where support custom string)
+
 ## 1.0.2 - 2023.05.24
 
 - Added: Request class functions(getBody, contentType, isAjax)

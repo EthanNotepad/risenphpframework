@@ -20,7 +20,7 @@ abstract class Model
     // or delete the field name of the soft delete
     protected static $softdelete = '';
 
-    public static function get(array $where, array $field = [])
+    public static function get(array $where = [], array $field = [])
     {
         try {
             $result = DB::link(static::$connection)->table(static::tablename())->field($field)->where(static::handleWhere($where))->get();
@@ -41,7 +41,7 @@ abstract class Model
         return $result;
     }
 
-    public static function all(array $where = [], array $field = [])
+    public static function all($where = [], array $field = [])
     {
         return static::getAll($where, $field);
     }
@@ -81,7 +81,7 @@ abstract class Model
         return $result;
     }
 
-    public static function delete(array $where)
+    public static function delete(array $where = [])
     {
         try {
             if (empty(static::$softdelete)) {
@@ -115,7 +115,7 @@ abstract class Model
         return $result;
     }
 
-    public static function first(array $where = [], array $field = [])
+    public static function first($where = [], array $field = [])
     {
         try {
             $result = DB::link(static::$connection)->table(static::tablename())->field($field)->where(static::handleWhere($where))->first();
@@ -125,7 +125,7 @@ abstract class Model
         return $result;
     }
 
-    public static function last(array $where, array $field = [])
+    public static function last(array $where = [], array $field = [])
     {
         try {
             $result = DB::link(static::$connection)->table(static::tablename())->field($field)->where(static::handleWhere($where))->last();
