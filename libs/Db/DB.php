@@ -96,7 +96,7 @@ class DB implements DbInterface
         if (isset(self::$dbConfig['prefix_indexes']) && self::$dbConfig['prefix_indexes']) {
             $table = self::$dbConfig['prefix'] . $table;
         }
-        $this->table = $table;
+        $this->table = $this->fieldsSafe($table);
         return self::$db_instance;
     }
 
@@ -106,16 +106,26 @@ class DB implements DbInterface
         // Add backticks to the field name to avoid sql injection
         foreach ($fields as $key => $value) {
             if (empty($value)) continue;
-            if (is_array($value)) {
-                $fieldsSafe[$key] = '`' . implode('`,`', $value) . '`';
-            } else {
-                $fieldsSafe[$key] = '`' . $value . '`';
-            }
+            $fieldsSafe[$key] = $this->fieldsSafe($value);
         }
         if (isset($fieldsSafe)) {
             $this->field = implode(',', $fieldsSafe);
         }
         return self::$db_instance;
+    }
+
+    public function fieldsSafe()
+    {
+        $params = func_get_args();
+        $fields = $params[0];
+
+        if (is_array($fields)) {
+            $fieldsSafe = '`' . implode('`,`', $fields) . '`';
+        } else {
+            $fieldsSafe = '`' . $fields . '`';
+        }
+
+        return $fieldsSafe;
     }
 
     public function join(string $table, string $condition, string $type = 'LEFT')
@@ -160,30 +170,30 @@ class DB implements DbInterface
                 if (is_numeric($key) && is_array($item)) {
                     // support for array like ['id', '=', 1]
                     if (count($item) === 3) {
-                        $this->where .= $item[0] . ' ' . $item[1] . ' ' . $this->handleString($item[2]);
+                        $this->where .= $this->fieldsSafe($item[0]) . ' ' . $item[1] . ' ' . $this->handleString($item[2]);
                     } elseif (count($item) === 2) {
                         // support for array like ['id', 1] or ['id', [1,2,3]]
                         if (is_array($item[1])) {
-                            $this->where .= $item[0] . ' IN (' . implode(',', $item[1]) . ')';
+                            $this->where .= $this->fieldsSafe($item[0]) . ' IN (' . implode(',', $item[1]) . ')';
                         } else {
-                            $this->where .= $item[0] . $sep . $this->handleString($item[1]);
+                            $this->where .= $this->fieldsSafe($item[0]) . $sep . $this->handleString($item[1]);
                         }
                     } elseif (count($item) === 1) {
                         // support for array like ['id' => 1]
-                        $this->where .= key($item) . $sep . $this->handleString($item[key($item)]);
+                        $this->where .= $this->fieldsSafe(key($item)) . $sep . $this->handleString($item[key($item)]);
                     }
                 } elseif (is_numeric($key) && !is_array($item)) {
                     // support for array like ['id = 1', 'name = test'], but note that it's not safe
                     $this->where .= $item;
                 } else {
                     // support for array like ['id' => 1, 'name' => 'test']
-                    $this->where .= $key . $sep . $this->handleString($item);
+                    $this->where .= $this->fieldsSafe($key) . $sep . $this->handleString($item);
                 }
             }
         } else {
             if (!empty($value)) {
                 // support for params like ('id', '=', 1) or ('id', '>', 1) or ('id', 'REGEXP', 'test')
-                $this->where .= $combineOperator . $where . $sep . $this->handleString($value);
+                $this->where .= $combineOperator . $this->fieldsSafe($where) . $sep . $this->handleString($value);
             } else {
                 // support for params like ('id = 1') or ('id = 1 OR id = 2'), but note that it's not safe
                 $this->where .= $combineOperator . $where;
@@ -309,7 +319,7 @@ class DB implements DbInterface
         if (empty($this->where)) {
             throw new Exception("When updating or deleting, where is required.");
         }
-        $sql = "UPDATE {$this->table} SET " . implode('=?, ', array_keys($vars)) . "=? {$this->where}";
+        $sql = "UPDATE {$this->table} SET `" . implode('` = ?, `', array_keys($vars)) . "` = ? {$this->where}";
         return $this->execute($sql, array_values($vars));
     }
 

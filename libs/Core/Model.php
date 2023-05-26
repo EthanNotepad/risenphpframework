@@ -156,6 +156,16 @@ abstract class Model
         return $result;
     }
 
+    public static function sql(array $where)
+    {
+        try {
+            $result = DB::link(static::$connection)->table(static::tablename())->where(static::handleWhere($where))->getSql();
+        } catch (\Exception $e) {
+            return $e->getMessage();
+        }
+        return $result;
+    }
+
     public static function tablename()
     {
         if (static::$tablename == '') {

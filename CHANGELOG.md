@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.0.31 - 2023.05.26
+
+- Added: `Model` class add `sql` function(you can get the sql query statement)
+- Fixed: `DB` class Add "`" symbols on both sides of the field to avoid SQL keyword conflicts
+  include all table name and field name
+- Added: index add RISEN_START, You can use it to count the time spent by the program running,
+  it's interesting, isn't it
+- Added: validaterules add time and double rules function
+- Added: `helper` add `lang` class and `Rdate` class
+
 ## 1.0.3 - 2023.05.25
 
 - Added: index page add version

@@ -48,6 +48,14 @@ class ValidateRules
         return is_numeric($value);
     }
 
+    protected function validate_double($value, $params, $data)
+    {
+        if (empty($value)) {
+            return true;
+        }
+        return is_double($value);
+    }
+
     protected function validate_date($value, $params, $data)
     {
         if (empty($value)) {
@@ -61,6 +69,18 @@ class ValidateRules
         $date = \DateTime::createFromFormat($format, $value);
 
         return $date && $date->format($format) == $value;
+    }
+
+    protected function validate_time($value, $params, $data)
+    {
+        if (empty($value)) {
+            return true;
+        }
+        // $pattern = '/^([0-1]\d|2[0-3]):([0-5]\d):([0-5]\d)(\.\d{1,6})?$/';
+        // change to 000:00:00.000000
+        $pattern = '/^(-?\d{1,3}):([0-5]\d):([0-5]\d)(\.\d{1,6})?$/';
+
+        return preg_match($pattern, $value);
     }
 
     protected function validate_email($value, $params, $data)
