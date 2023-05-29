@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.32 - 2023.05.29
+
+- Improved: `Router` class(Support soft router with `_`)
+
 ## 1.0.31 - 2023.05.26
 
 - Added: `Model` class add `sql` function(you can get the sql query statement)

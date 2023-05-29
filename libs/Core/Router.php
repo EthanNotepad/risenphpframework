@@ -208,8 +208,27 @@ class Router
                 // Remove the first segment (the empty string)
                 array_shift($segments);
 
-                // Build the fully-qualified controller class name and method name from the segments
-                $controller = 'app\\Controller\\' . implode('\\', array_map('ucfirst', $segments)) . 'Controller';
+                foreach ($segments as $key => $value) {
+                    // If the segment is empty, remove it
+                    if ($value == '') {
+                        unset($segments[$key]);
+                    }
+                }
+
+                // Capitalize the segments and convert underscores to CamelCase
+                $controllerSegments = array_map(function ($segment) {
+                    $words = explode('_', $segment);
+                    $words = array_map('ucfirst', $words);
+                    return implode('', $words);
+                }, $segments);
+
+                // Append "Controller" to the last segment
+                $controllerSegments[count($controllerSegments) - 1] .= 'Controller';
+
+                // Build the fully-qualified controller class name
+                $controller = 'app\\Controller\\' . implode('\\', $controllerSegments);
+
+                // Default function name (e.g., "index")
                 $functionName = 'index';
 
                 // Check if the fully-qualified controller class exists and the method is callable
