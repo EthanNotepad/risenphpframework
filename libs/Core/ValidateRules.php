@@ -4,7 +4,7 @@ namespace libs\Core;
 
 class ValidateRules
 {
-    protected function validate_required($value, $params, $data)
+    public function validate_required($value, $params, $data)
     {
         if (is_numeric($value) || is_bool($value)) {
             return true;
@@ -12,7 +12,7 @@ class ValidateRules
         return !empty($value);
     }
 
-    protected function validate_min($value, $params, $data)
+    public function validate_min($value, $params, $data)
     {
         if (empty($value)) {
             return true;
@@ -26,7 +26,7 @@ class ValidateRules
         return strlen($value) >= $min;
     }
 
-    protected function validate_max($value, $params, $data)
+    public function validate_max($value, $params, $data)
     {
         if (empty($value)) {
             return true;
@@ -40,7 +40,7 @@ class ValidateRules
         return strlen($value) <= $max;
     }
 
-    protected function validate_numeric($value, $params, $data)
+    public function validate_numeric($value, $params, $data)
     {
         if (empty($value)) {
             return true;
@@ -48,7 +48,7 @@ class ValidateRules
         return is_numeric($value);
     }
 
-    protected function validate_double($value, $params, $data)
+    public function validate_double($value, $params, $data)
     {
         if (empty($value)) {
             return true;
@@ -56,7 +56,7 @@ class ValidateRules
         return is_double($value);
     }
 
-    protected function validate_date($value, $params, $data)
+    public function validate_date($value, $params, $data)
     {
         if (empty($value)) {
             return true;
@@ -71,19 +71,18 @@ class ValidateRules
         return $date && $date->format($format) == $value;
     }
 
-    protected function validate_time($value, $params, $data)
+    public function validate_time($value, $params, $data)
     {
         if (empty($value)) {
             return true;
         }
-        // $pattern = '/^([0-1]\d|2[0-3]):([0-5]\d):([0-5]\d)(\.\d{1,6})?$/';
-        // change to 000:00:00.000000
-        $pattern = '/^(-?\d{1,3}):([0-5]\d):([0-5]\d)(\.\d{1,6})?$/';
+        // support 000:00:00.000000 and 000:00
+        $pattern = '/^(-?\d{1,3}):([0-5]\d{1,2})(:[0-5]\d{1,2})?(\.\d{1,6})?$/';
 
         return preg_match($pattern, $value);
     }
 
-    protected function validate_email($value, $params, $data)
+    public function validate_email($value, $params, $data)
     {
         if (empty($value)) {
             return true;
@@ -91,7 +90,7 @@ class ValidateRules
         return filter_var($value, FILTER_VALIDATE_EMAIL) !== false;
     }
 
-    protected function validate_phone($value, $params, $data)
+    public function validate_phone($value, $params, $data)
     {
         if (empty($value)) {
             return true;
@@ -99,7 +98,7 @@ class ValidateRules
         return preg_match('/^1[34578]\d{9}$/', $value);
     }
 
-    protected function validate_integer($value, $params, $data)
+    public function validate_integer($value, $params, $data)
     {
         if (empty($value)) {
             return true;
@@ -107,7 +106,7 @@ class ValidateRules
         return filter_var($value, FILTER_VALIDATE_INT) !== false;
     }
 
-    protected function validate_float($value, $params, $data)
+    public function validate_float($value, $params, $data)
     {
         if (empty($value)) {
             return true;
@@ -115,7 +114,7 @@ class ValidateRules
         return filter_var($value, FILTER_VALIDATE_FLOAT) !== false;
     }
 
-    protected function validate_boolean($value, $params, $data)
+    public function validate_boolean($value, $params, $data)
     {
         if (empty($value)) {
             return true;
@@ -123,7 +122,7 @@ class ValidateRules
         return filter_var($value, FILTER_VALIDATE_BOOLEAN) !== false;
     }
 
-    protected function validate_array($value, $params, $data)
+    public function validate_array($value, $params, $data)
     {
         if (empty($value)) {
             return true;
@@ -135,7 +134,7 @@ class ValidateRules
      * Validates that the value contains only alphabetical characters.
      * 验证该值是否仅包含字母。
      */
-    protected function validate_alpha($value, $params, $data)
+    public function validate_alpha($value, $params, $data)
     {
         if (empty($value)) {
             return true;
@@ -143,7 +142,7 @@ class ValidateRules
         return ctype_alpha($value);
     }
 
-    protected function validate_alphanumeric($value, $params, $data)
+    public function validate_alphanumeric($value, $params, $data)
     {
         if (empty($value)) {
             return true;
@@ -158,7 +157,7 @@ class ValidateRules
      *      'confirm_password' => ['required', 'same:password'],
      * ];
      */
-    protected function validate_same($value, $params, $data)
+    public function validate_same($value, $params, $data)
     {
         if (!isset($params[0])) {
             throw new \Exception("Validation rule 'same' requires a parameter.");
@@ -169,7 +168,7 @@ class ValidateRules
         return isset($data[$other_field]) && $value === $data[$other_field];
     }
 
-    protected function validate_different($value, $params, $data)
+    public function validate_different($value, $params, $data)
     {
         if (!isset($params[0])) {
             throw new \Exception("Validation rule 'different' requires a parameter.");
@@ -180,7 +179,7 @@ class ValidateRules
         return !isset($data[$other_field]) || $value !== $data[$other_field];
     }
 
-    protected function validate_url($value, $params, $data)
+    public function validate_url($value, $params, $data)
     {
         if (empty($value)) {
             return true;
@@ -188,7 +187,7 @@ class ValidateRules
         return filter_var($value, FILTER_VALIDATE_URL) !== false;
     }
 
-    protected function validate_ip($value, $params, $data)
+    public function validate_ip($value, $params, $data)
     {
         if (empty($value)) {
             return true;
@@ -200,7 +199,7 @@ class ValidateRules
      * example:
      * $rules = ['gender' => ['required', 'in:male,female'],];
      */
-    protected function validate_in($value, $params, $data)
+    public function validate_in($value, $params, $data)
     {
         if (empty($value)) {
             return true;
@@ -214,7 +213,7 @@ class ValidateRules
         return in_array($value, $allowed_values);
     }
 
-    protected function validate_not_in($value, $params, $data)
+    public function validate_not_in($value, $params, $data)
     {
         if (empty($value)) {
             return true;
@@ -228,7 +227,7 @@ class ValidateRules
         return !in_array($value, $disallowed_values);
     }
 
-    protected function validate_uppercase($value, $params, $data)
+    public function validate_uppercase($value, $params, $data)
     {
         if (empty($value)) {
             return true;
@@ -236,7 +235,7 @@ class ValidateRules
         return preg_match('/[A-Z]/', $value);
     }
 
-    protected function validate_lowercase($value, $params, $data)
+    public function validate_lowercase($value, $params, $data)
     {
         if (empty($value)) {
             return true;
@@ -244,7 +243,7 @@ class ValidateRules
         return preg_match('/[a-z]/', $value);
     }
 
-    protected function validate_symbol($value, $params, $data)
+    public function validate_symbol($value, $params, $data)
     {
         if (empty($value)) {
             return true;

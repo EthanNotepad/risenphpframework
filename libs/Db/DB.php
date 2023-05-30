@@ -241,6 +241,13 @@ class DB implements DbInterface
         return count($this->query($sql));
     }
 
+    public function sum($field)
+    {
+        $sql = $this->getSql();
+        $result = $this->queryOne($sql);
+        return $result[$field];
+    }
+
     public function exists()
     {
         $this->limit(1);
@@ -311,6 +318,28 @@ class DB implements DbInterface
         return $this->execute($sql, array_values($vars));
     }
 
+    public function insertAll(array $vars)
+    {
+        // $vars like [['name' => 'test1'], ['name' => 'test2']]
+        if (empty($this->table)) {
+            throw new Exception("missing table name.");
+        }
+        $fields = '`' . implode('`,`', array_keys($vars[0])) . '`';
+        $values = [];
+        foreach ($vars as $item) {
+            $values[] = '(' . implode(',', array_fill(0, count($item), '?')) . ')';
+        }
+        $values = implode(',', $values);
+        $sql = "INSERT INTO {$this->table} ($fields) VALUES $values";
+        $values = [];
+        foreach ($vars as $item) {
+            foreach ($item as $value) {
+                $values[] = $value;
+            }
+        }
+        return $this->execute($sql, $values);
+    }
+
     public function update(array $vars)
     {
         if (empty($this->table)) {
@@ -323,6 +352,26 @@ class DB implements DbInterface
         return $this->execute($sql, array_values($vars));
     }
 
+    public function updateAll(array $vars)
+    {
+        // $vars like [['name' => 'test1'], ['name' => 'test2']]
+        if (empty($this->table)) {
+            throw new Exception("missing table name.");
+        }
+        if (empty($this->where)) {
+            throw new Exception("When updating or deleting, where is required.");
+        }
+        $fields = array_keys($vars[0]);
+        $sql = "UPDATE {$this->table} SET `" . implode('` = CASE ' . $fields[0] . ' ', array_fill(0, count($fields), '?')) . "END {$this->where}";
+        $values = [];
+        foreach ($vars as $item) {
+            foreach ($item as $value) {
+                $values[] = $value;
+            }
+        }
+        return $this->execute($sql, $values);
+    }
+
     public function delete($key = '')
     {
         if (empty($this->table)) {
@@ -333,6 +382,96 @@ class DB implements DbInterface
         }
         $sql = "DELETE FROM {$this->table} {$this->where}";
         return $this->execute($sql);
+    }
+
+    public function deleteAll()
+    {
+        return $this->delete(true);
+    }
+
+    public function truncate()
+    {
+        if (empty($this->table)) {
+            throw new Exception("missing table name.");
+        }
+        $sql = "TRUNCATE TABLE {$this->table}";
+        return $this->execute($sql);
+    }
+
+    public function getFields()
+    {
+        if (empty($this->table)) {
+            throw new Exception("missing table name.");
+        }
+        $dbname = self::$dbConfig['dbname'];
+        $sql = "SELECT column_name 
+        FROM information_schema.columns 
+        WHERE table_schema = '{$dbname}' AND table_name = '{$this->table}'";
+        $fields = $this->query($sql);
+        $fields = array_column($fields, 'column_name');
+        return $fields;
+    }
+
+    public function getPrimaryKey()
+    {
+        if (empty($this->table)) {
+            throw new Exception("missing table name.");
+        }
+        $dbname = self::$dbConfig['dbname'];
+        $sql = "SELECT column_name 
+        FROM information_schema.columns 
+        WHERE table_schema = '{$dbname}' AND table_name = '{$this->table}' AND column_key = 'PRI'";
+        $key = $this->queryOne($sql)['column_name'] ?? '';
+        return $key;
+    }
+
+    public function getTable()
+    {
+        return $this->table;
+    }
+
+    public function getTableStatus()
+    {
+        if (empty($this->table)) {
+            throw new Exception("missing table name.");
+        }
+        $dbname = self::$dbConfig['dbname'];
+        $sql = "SELECT * 
+        FROM information_schema.tables 
+        WHERE table_schema = '{$dbname}' AND table_name = '{$this->table}'";
+        $status = $this->queryOne($sql);
+        return $status;
+    }
+
+    public function getTables()
+    {
+        $dbname = self::$dbConfig['dbname'];
+        $sql = "SELECT * 
+        FROM information_schema.tables 
+        WHERE table_schema = '{$dbname}'";
+        $tables = $this->query($sql);
+        return $tables;
+    }
+
+    public function getDatabases()
+    {
+        $sql = "SELECT * 
+        FROM information_schema.schemata";
+        $databases = $this->query($sql);
+        return $databases;
+    }
+
+    public function getTableInfo()
+    {
+        if (empty($this->table)) {
+            throw new Exception("missing table name.");
+        }
+        $dbname = self::$dbConfig['dbname'];
+        $sql = "SELECT * 
+        FROM information_schema.columns 
+        WHERE table_schema = '{$dbname}' AND table_name = '{$this->table}'";
+        $info = $this->query($sql);
+        return $info;
     }
 
     public function query(string $sql, array $vars = [])
@@ -372,14 +511,6 @@ class DB implements DbInterface
         }
         $sql = "SELECT {$this->field} FROM {$this->table}{$this->join}{$this->where}{$this->order}{$this->limit}";
         return $sql;
-    }
-
-    public function execSql()
-    {
-        // TODO not finshed
-        // save(), delete()
-        $params = func_get_args();
-        $modules = $params[0];
     }
 
     // Output sql query

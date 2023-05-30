@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.0.33 - 2023.05.30
+
+- Fixed: `validate_time` Support time format like: `000:00`
+- Added: `DB` class add multi method(sum, insertAll, updateAll, truncate, etc...)
+- Added: `Model` class add multi method(like to `DB`)
+- Note: Added methods are not actually tested
+
 ## 1.0.32 - 2023.05.29
 
 - Improved: `Router` class(Support soft router with `_`)
