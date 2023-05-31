@@ -2,18 +2,14 @@
 
 namespace libs\Core;
 
-class Validator extends ValidateRules
+class Validator
 {
     private $data;
     private $rules;
     private $messages;
-    private $fields;
-    private $alias = [
-        'numeric' => ['number', 'num'],
-        'symbol' => ['specialcharacter'],
-    ];
+    private $fields = [];
 
-    public function __construct($data, $rules, $messages = [])
+    public function __construct(array $data, array $rules, array $messages = [])
     {
         $this->data = $data;
         $this->rules = $rules;
@@ -24,52 +20,36 @@ class Validator extends ValidateRules
     {
         $errors = [];
         foreach ($this->rules as $field => $rules) {
+            // Only validate the field if it has been set
+            if ($this->shouldSkipField($field)) {
+                continue;
+            }
+
+            // Get the value of the field being validated
+            $value = isset($this->data[$field]) ? $this->data[$field] : null;
+
+            // skip validation if value is empty and the field is not required
+            if (empty($value) && !in_array('required', $rules)) {
+                continue;
+            }
+
             foreach ($rules as $rule) {
-                // Only validate the field if it has been set
-                if (!empty($this->fields) && !in_array($field, $this->fields)) {
-                    continue;
+                // Get the validation rule and params from the rule string
+                $validationRule = ValidateRules::getValidationRule($rule);
+                if ($validationRule === false) {
+                    throw new \Exception("Invalid validation rule: $rule");
                 }
+                $params = $validationRule['params'];
+                $rule = $validationRule['rule'];
 
-                if (isset($this->data[$field])) {
-                    $value = $this->data[$field];
-                } else {
-                    $value = null;
-                }
-                $params = null;
-
-                if (strpos($rule, ':') !== false) {
-                    list($rule, $params) = explode(':', $rule, 2);
-                    $params = explode(',', $params);
-                }
-
-                $method = 'validate_' . $rule;
-
-                if (!method_exists($this, $method)) {
-                    // Add an alias system, if the verification rule cannot be found, 
-                    // the alias will be searched, and if it exists, the defined rule will be used
-                    $alias_matched = false;
-                    foreach ($this->alias as $alias_key => $alias_array) {
-                        if (in_array($rule, $alias_array)) {
-                            $method = 'validate_' . $alias_key;
-                            $alias_matched = true;
-                            break;
-                        }
-                    }
-                    if (!$alias_matched) {
-                        throw new \Exception("Invalid validation rule: $rule");
-                    }
-                }
-
-                if (!$this->$method($value, $params, $this->data)) {
-                    $message = isset($this->messages["$field.$rule"]) ? $this->messages["$field.$rule"] : "The $field field is invalid.";
+                // Call the validation method with the value, params, and data
+                if (!$validationRule['method']($value, $params, $this->data)) {
+                    $message = $this->getValidationMessage($field, $rule, $params);
                     $errors[$field] = $message;
-
-                    // Stop validating this field if it fails
-                    break;
+                    break; // Stop validating this field if it fails
                 }
             }
         }
-
         return count($errors) ? $errors : true;
     }
 
@@ -77,5 +57,17 @@ class Validator extends ValidateRules
     {
         $this->fields = $value;
         return $this;
+    }
+
+    private function shouldSkipField(string $field)
+    {
+        return !empty($this->fields) && !in_array($field, $this->fields);
+    }
+
+    private function getValidationMessage(string $field, string $rule, array $params)
+    {
+        $messageKey = "$field.$rule";
+        $defaultMessage = ValidateRules::getDefaultMessage($field, $rule, $params);
+        return isset($this->messages[$messageKey]) ? $this->messages[$messageKey] : $defaultMessage;
     }
 }

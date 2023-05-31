@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.34 - 2023.05.30
+
+- Improved: `validator` class, Optimize the code and add the default message
+
 ## 1.0.33 - 2023.05.30
 
 - Fixed: `validate_time` Support time format like: `000:00`
