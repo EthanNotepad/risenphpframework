@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.34 - 2023.06.02
+
+- Fixed: `model` class getAll will return all rows by default
+
 ## 1.0.34 - 2023.05.30
 
 - Improved: `validator` class, Optimize the code and add the default message

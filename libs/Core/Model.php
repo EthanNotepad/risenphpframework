@@ -20,6 +20,8 @@ abstract class Model
     // or delete the field name of the soft delete
     protected static $softdelete = '';
 
+    // not used yet
+
     // Define the field name of the create time, if it is empty, it means that the create time is not enabled
     protected static $createTime = '';
 
@@ -39,7 +41,7 @@ abstract class Model
         return $result;
     }
 
-    public static function getAll(array $where = [], array $field = [], $limit = 0, $offset = 40, $order = '', $orderType = '')
+    public static function getAll(array $where = [], array $field = [], $limit = 0, $offset = 10000, $order = '', $orderType = '')
     {
         try {
             $order = static::handleOrder($order, $orderType);
@@ -49,8 +51,6 @@ abstract class Model
         }
         return $result;
     }
-
-
 
     public static function all($where = [], array $field = [])
     {
