@@ -1,6 +1,13 @@
 # Changelog
 
-## 1.0.34 - 2023.06.02
+## 1.0.36 - 2023.06.05
+
+- Added: `helper` add `__` method, you can use it to get the language text
+- Added: `filesystem` config file
+- Added: `UploadFiles` helper class and `uploader` tool
+- Optimized: framework code
+
+## 1.0.35 - 2023.06.02
 
 - Fixed: `model` class getAll will return all rows by default
 

@@ -10,24 +10,12 @@ class App
 {
     public static function run()
     {
-        // self::check();
         self::init();
         self::loadConfig();
         self::runAction();
     }
 
-    // public static function check()
-    // {
-    //     $msg = '';
-    //     if (!file_exists(PROJECT_ROOT_PATH . "/routes/web.php")) {
-    //         $msg .= 'The /routes/web.php file does not exist.<br>';
-    //     }
-    //     if ($msg) {
-    //         die("<h1 style='margin:20px;color:#535353;font:24px/1.2 Helvetica, Arial'>
-    //             <span style='font-size:150px;'>:(</span><br/>{$msg}</h1>");
-    //     }
-    // }
-
+    // initailize app
     public static function init()
     {
         self::appFiles();
@@ -36,6 +24,7 @@ class App
         self::appDisplayErrors();
     }
 
+    // load all autoload files in bootstrap/App
     public static function appFiles()
     {
         $baseDir = PROJECT_ROOT_PATH . '/bootstrap/App';
@@ -45,6 +34,7 @@ class App
         }
     }
 
+    // load .env file
     public static function appEnv()
     {
         if (config('isUseEnv')) {
@@ -61,6 +51,7 @@ class App
         }
     }
 
+    // set default timezone
     public static function appTimeZone()
     {
         if (config('isConfigTimeZone')) {
@@ -72,6 +63,7 @@ class App
         }
     }
 
+    // set display errors
     public static function appDisplayErrors()
     {
         (new CoreError(config('displayErrors')))->bootstrap();
@@ -92,7 +84,7 @@ class App
         }
     }
 
-    // clear all cache files
+    // clear all cache files if config('app.isCacheConfig') is false
     public static function deleteCache($dir = PROJECT_CACHE_PATH)
     {
         if (is_dir($dir)) {
@@ -109,6 +101,7 @@ class App
         }
     }
 
+    // run action
     public static function runAction()
     {
         (new HandleCors())->handle();

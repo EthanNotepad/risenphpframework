@@ -144,6 +144,16 @@ if (!function_exists('lang')) {
     }
 }
 
+if (!function_exists('__')) {
+    function __($key = null, $locale = null)
+    {
+        if (is_null($key)) {
+            return $key;
+        }
+        return lang($key, $locale);
+    }
+}
+
 /**
  * --------------------------------------------------------------------------------
  * Return the default value of the given value.
