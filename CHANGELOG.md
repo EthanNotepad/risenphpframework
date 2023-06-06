@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.37 - 2023.06.06
+
+- Added: `Rdate` helper class add `currentWeek` method
+
 ## 1.0.36 - 2023.06.05
 
 - Added: `helper` add `__` method, you can use it to get the language text

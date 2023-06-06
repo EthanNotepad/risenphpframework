@@ -22,4 +22,25 @@ class Rdate
             'seconds' => $resultSeconds
         ];
     }
+
+    /**
+     * @Description get current week start date and end date
+     * @DateTime 2023-06-06
+     * @return array
+     */
+    function currentWeek()
+    {
+        $date = new \DateTime();
+        $week = $date->format("W");
+        $year = $date->format("Y");
+        // $week = $week - 1;
+        $date->setISODate($year, $week);
+        $start = $date->format('Y-m-d');
+        $date->modify('+6 days');
+        $end = $date->format('Y-m-d');
+        return [
+            'start' => $start,
+            'end' => $end
+        ];
+    }
 }
