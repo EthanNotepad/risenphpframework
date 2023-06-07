@@ -28,12 +28,15 @@ class Rdate
      * @DateTime 2023-06-06
      * @return array
      */
-    function currentWeek()
+    function currentWeek($week = '', $year = '')
     {
+        if (empty($week)) {
+            $week = date('W');
+        }
+        if (empty($year)) {
+            $year = date('Y');
+        }
         $date = new \DateTime();
-        $week = $date->format("W");
-        $year = $date->format("Y");
-        // $week = $week - 1;
         $date->setISODate($year, $week);
         $start = $date->format('Y-m-d');
         $date->modify('+6 days');

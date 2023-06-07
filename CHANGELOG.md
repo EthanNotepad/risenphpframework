@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.0.38 - 2023.06.07
+
+- Optimized: `Rdate` helper class `currentWeek` method
+- Optimized: `DB` core class `insertAll` method
+
 ## 1.0.37 - 2023.06.06
 
 - Added: `Rdate` helper class add `currentWeek` method

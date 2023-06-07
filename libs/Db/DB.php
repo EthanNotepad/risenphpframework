@@ -324,7 +324,10 @@ class DB implements DbInterface
         if (empty($this->table)) {
             throw new Exception("missing table name.");
         }
-        $fields = '`' . implode('`,`', array_keys($vars[0])) . '`';
+        if (empty($vars)) {
+            return 0;
+        }
+        $fields = '`' . implode('`,`', array_keys(reset($vars))) . '`'; // reset($vars) get first item of array
         $values = [];
         foreach ($vars as $item) {
             $values[] = '(' . implode(',', array_fill(0, count($item), '?')) . ')';
