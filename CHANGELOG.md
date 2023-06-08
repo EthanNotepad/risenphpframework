@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.39 - 2023.06.08
+
+- Fixed: `DB` core class, handlestring for where
+
 ## 1.0.38 - 2023.06.07
 
 - Optimized: `Rdate` helper class `currentWeek` method

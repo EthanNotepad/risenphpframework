@@ -539,6 +539,9 @@ class DB implements DbInterface
     protected function handleString($value)
     {
         if (is_string($value)) {
+            if (substr($value, 0, 1) === "(") {
+                return $value; // Skip processing if the first character is "("
+            }
             $value = '"' . $value . '"';
         }
         return $value;
