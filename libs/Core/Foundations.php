@@ -4,7 +4,7 @@ namespace libs\Core;
 
 class Foundations
 {
-    const VERSION = '1.0.39';
+    const VERSION = '1.0.40';
 
     /**
      * Get the version number of the application.

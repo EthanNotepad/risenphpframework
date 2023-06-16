@@ -69,6 +69,7 @@ class ValidateRules
             'email' => 'the :attribute field must be a valid email address.',
             'phone' => 'the :attribute field must be a valid phone number.',
             'integer' => 'the :attribute field must be an integer.',
+            'decimal' => 'the :attribute field has too many decimal places.',
             'float' => 'the :attribute field must be a float.',
             'boolean' => 'the :attribute field must be a boolean.',
             'array' => 'the :attribute field must be an array.',
@@ -165,6 +166,24 @@ class ValidateRules
     public static function validate_float($value, $params, $data)
     {
         return filter_var($value, FILTER_VALIDATE_FLOAT) !== false;
+    }
+
+    public static function validate_decimal($value, $params, $data)
+    {
+        if (!isset($params[0])) {
+            $params[0] = 2;
+        }
+
+        $decimalPlaces = intval($params[0]);
+
+        // Remove any thousands separators
+        $value = str_replace(',', '', $value);
+
+        // Create the regular expression pattern dynamically based on the decimal places parameter
+        $pattern = '/^\d+(\.\d{1,' . $decimalPlaces . '})?$/';
+
+        // Check if the value is a valid decimal with the specified decimal places
+        return preg_match($pattern, $value);
     }
 
     public static function validate_boolean($value, $params, $data)

@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.40 - 2023.06.16
+
+Added: `ValidateRules` add `decimal` for judge the decimal precision
+
 ## 1.0.39 - 2023.06.08
 
 - Fixed: `DB` core class, handlestring for where
