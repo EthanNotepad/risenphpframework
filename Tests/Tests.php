@@ -60,16 +60,7 @@ class Tests extends TestExtends
                 'age' => ['required', 'numeric', 'min:18'],
                 'email' => ['required', 'email'],
             ];
-
-            $messages = [
-                'name.required' => 'The name field is required.',
-                'age.required' => 'The age field is required.',
-                'age.numeric' => 'The age field must be a number.',
-                'age.min' => 'The age field must be at least 18.',
-                'email.required' => 'The email field is required.',
-                'email.email' => 'The email field must be a valid email address.',
-            ];
-            $validator = new \libs\Core\Validator($data, $rules, $messages);
+            $validator = new \libs\Core\Validator($data, $rules);
             $validator->setFields(['name', 'age']);
             $resultValidated = $validator->validate();
             if ($resultValidated !== true) {
@@ -84,8 +75,8 @@ class Tests extends TestExtends
         if (0) {
             $filePath = PROJECT_ROOT_PATH . '/tests/imageData.base64';
             $imgData = file_get_contents($filePath);
-            $uploader = new \app\Tool\UploadFiles();
-            $imagePath = $uploader->uploadFilesBase64($imgData, 'public/upload/images/');
+            $uploader = new \libs\Helper\UploadFiles;
+            $imagePath = $uploader->uploadFilesBase64($imgData);
             echo $imagePath;
         }
 
@@ -143,7 +134,9 @@ class Tests extends TestExtends
 
         // Test the lang helper
         if (0) {
-            dd(lang('success', 'zh'));
+            // dd(lang('success'));
+            // dd(__('success', 'zh'));
+            // dd(111, \libs\Helper\Lang::get('success'));
         }
 
         echo '<br>';

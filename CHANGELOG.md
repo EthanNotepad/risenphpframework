@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.41 - 2023.06.19
+
+- Optimized: `helper` class `lang`, support $language is empty
+
 ## 1.0.40 - 2023.06.16
 
 Added: `ValidateRules` add `decimal` for judge the decimal precision

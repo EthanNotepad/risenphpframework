@@ -120,9 +120,12 @@ if (!function_exists('env')) {
  * --------------------------------------------------------------------------------
  */
 if (!function_exists('lang')) {
-    function lang(string $translation, string $language = 'en')
+    function lang(string $translation, string $language = '')
     {
         global $_CONFIG_LANG;
+        if (empty($language)) {
+            $language = substr(config('app.defaultLang'), 0, 2);
+        }
         if (!isset($_CONFIG_LANG[$language])) {
             // read cache file first
             createFolder(PROJECT_CACHE_PATH);
