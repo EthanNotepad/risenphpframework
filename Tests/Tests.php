@@ -61,8 +61,8 @@ class Tests extends TestExtends
                 'email' => ['required', 'email'],
             ];
             $validator = new \libs\Core\Validator($data, $rules);
-            $validator->setFields(['name', 'age']);
-            $resultValidated = $validator->validate();
+            $resultValidated = $validator->setFields(['name', 'age'])->validate();
+            dd($resultValidated);
             if ($resultValidated !== true) {
                 throw new Exception("Validation failed: " . $resultValidated);
             }
@@ -162,7 +162,7 @@ class Tests extends TestExtends
             'logs.user_id' => 1,
         ];
         $whereSql = "logs.id = $id AND logs.user_id = 1";
-        // dd(\libs\Db\DB::link()->getConfig());
+        dd(\libs\Db\DB::link()->getConfig());
         // $where_test = \libs\Db\DB::link()->table('logs')->where($id)->dd(); // where statement have one parameters, note this is a dangerous action because easy to be injected
         // $where_test = \libs\Db\DB::link()->table('logs')->where('id', $id)->dd(); // where statement have two parameters
         // $where_test = \libs\Db\DB::link()->table('logs')->where('id', '=', $id)->dd(); // where statement have three parameters

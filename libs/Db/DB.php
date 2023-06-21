@@ -525,8 +525,8 @@ class DB implements DbInterface
     // Release the content to avoid querying the last data
     protected function free()
     {
-        $this->field = '*';
-        $this->where = ' WHERE (1 = 1) ';
+        $this->field = ' * ';
+        $this->where = ' WHERE (1 = 1)';
         $this->table = $this->limit = $this->order = '';
         $this->join = [];
     }

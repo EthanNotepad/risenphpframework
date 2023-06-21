@@ -3,6 +3,7 @@
 namespace app\Controller;
 
 use libs\Core\FileLogger;
+use libs\Helper\Lang;
 
 class Message
 {
@@ -25,9 +26,9 @@ class Message
 
 
         if (in_array($code, array_keys(self::CODE_INFO))) {
-            $extraMessage = self::CODE_INFO[$code];
+            $extraMessage = Lang::get(self::CODE_INFO[$code]);
         } else {
-            $extraMessage = self::CODE_INFO[1000];
+            $extraMessage = Lang::get(self::CODE_INFO[1000]);
         }
         if (empty($message)) {
             $message = $extraMessage;

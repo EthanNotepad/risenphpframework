@@ -2,6 +2,8 @@
 
 namespace libs\Core;
 
+use libs\Helper\Lang;
+
 class ValidateRules
 {
     private static $alias = [
@@ -42,21 +44,22 @@ class ValidateRules
 
     public static function getDefaultMessage($field, $rule, $params)
     {
-        $defaultMessages = self::getDefaultMessages();
+        $defaultMessages = self::defaultMessages();
 
         if (isset($defaultMessages[$rule])) {
-            $defaultMessage = $defaultMessages[$rule];
+            $defaultMessage = Lang::get($defaultMessages[$rule]);
             $defaultMessage = str_replace(':attribute', $field, $defaultMessage);
             if (!is_null($params)) {
                 $defaultMessage = str_replace(':params', implode(', ', $params), $defaultMessage);
             }
-            return $defaultMessage;
+        } else {
+            $defaultMessage = "The $field field is invalid.";
         }
 
-        return "The $field field is invalid."; // Default fallback message
+        return $defaultMessage;
     }
 
-    private static function getDefaultMessages()
+    private static function defaultMessages()
     {
         return [
             'required' => 'the :attribute field is required.',
