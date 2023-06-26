@@ -46,4 +46,28 @@ class Rdate
             'end' => $end
         ];
     }
+
+    /**
+     * @Description get current week number
+     * @DateTime 2023-06-26
+     * @return int
+     */
+    function numberOfCurrentWeek($date = '')
+    {
+        if (empty($date)) {
+            $date = date('Y-m-d');
+        }
+        $firstDayOfYear = date('Y-01-01', strtotime($date));
+        $firstDayOfYearWeek = date('W', strtotime($firstDayOfYear)); // orginal week number of first day of year
+
+        $currentWeek = date('W', strtotime($date));
+
+        if ($currentWeek < $firstDayOfYearWeek) {
+            $currentWeek += 52;
+        }
+
+        $weekNumber = $currentWeek - $firstDayOfYearWeek + 1;
+
+        return $weekNumber;
+    }
 }

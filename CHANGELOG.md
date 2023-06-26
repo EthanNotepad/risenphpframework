@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.43 - 2023.06.26
+
+- Added: `Rdate` helper class add `numberOfCurrentWeek` method
+
 ## 1.0.42 - 2023.06.20
 
 - Optimized: `validateRules` default message support mutipi language config
